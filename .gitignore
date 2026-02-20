@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Local data and secrets
+Controle_Financeiro_*.xlsx
+*.log
+*.json
+
+# Local profiles and builds
+perfil_chrome/
+perfil_firefox/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+dist/
+dist/
+*.exe
