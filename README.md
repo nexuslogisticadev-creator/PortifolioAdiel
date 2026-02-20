@@ -19,7 +19,7 @@ python painel.py
 ```
 
 - Executável (Release): baixe o instalador/binário em:
-    https://github.com/nexuslogisticadev-creator/portfolio-RPAbot/releases
+    https://github.com/nexuslogisticadev-creator/BOT-CONTROL.git
 
 **Build (gerar EXE)**
 
@@ -34,10 +34,6 @@ Após gerar, publique os binários como assets na página de Releases (recomenda
 **Segurança / Tokens**
 
 - Não comite tokens/API keys no repositório. Use `GITHUB_TOKEN`/variáveis de ambiente ou o Git Credential Manager. Revogue tokens expostos imediatamente.
-
-**Links úteis**
-
-- Releases: https://github.com/nexuslogisticadev-creator/portfolio-RPAbot/releases
 
 **Contribuindo**
 
