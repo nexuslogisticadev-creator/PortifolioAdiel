@@ -64,15 +64,6 @@ Após gerar, publique os binários como assets na página de Releases (recomenda
 
 Este documento resume as otimizações implementadas para resolver o problema de performance.
 
-````markdown
-# 🚀 PAINEL BOT - OTIMIZADO
-
-## ✨ Bem-vindo! Seu painel foi otimizado.
-
-Este documento resume as otimizações implementadas para resolver o problema de performance.
-
----
-
 ## 📊 Resultados em Uma Palavra
 
 **O painel agora é 70-90% MAIS RÁPIDO** ⚡
@@ -84,8 +75,6 @@ Este documento resume as otimizações implementadas para resolver o problema de
 | CPU (ocioso) | 8-15% | 0.5-2% | **90%** ⬇️ |
 | RAM usado | 600MB | 350MB | **42%** ⬇️ |
 | Resposta UI | 500ms+ | <100ms | **5x** ⬆️ |
-
----
 
 ## 🎯 5 Otimizações Principais
 
@@ -113,8 +102,6 @@ Este documento resume as otimizações implementadas para resolver o problema de
 ✅ Pandas 2.8x mais rápido que openpyxl  
 ✅ Carregamento automático da sheet VALES  
 ✅ Fallback inteligente se Pandas falhar  
-
----
 
 ## 📁 Como Usar
 
