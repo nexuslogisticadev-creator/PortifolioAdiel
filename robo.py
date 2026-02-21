@@ -195,20 +195,23 @@ TIMESTAMP_ACEITOS = {}  # Guarda quando cada pedido foi CRIADO (hora original do
 ULTIMO_ALERTA_ESTOQUE = 0
 RELATORIO_ENVIADO_HOJE = False # <--- ADICIONE ISSO
 
-# === PROTEÇÃO ANTI-DETECÇÃO ===
 REQUISICOES_HOJE = 0
 DATA_ULTIMO_RESET = datetime.now().date()
-LIMITE_REQUISICOES_DIA = 3000  # Limite seguro por dia
 ERROS_CONSECUTIVOS = 0  # Para backoff exponencial
 
 driver = None
 LOJA_COORDS = None
 LAST_WHATSAPP_REFRESH = 0
-WHATSAPP_REFRESH_INTERVAL = 60 * 60 * 2
-LAST_ZE_REFRESH = 0
-ZE_DELIVERY_REFRESH_INTERVAL = 60 * 20
+LAST_REFRESH_1 = 0
+LAST_REFRESH_2 = 0
 LAST_CHROME_RESTART = 0
-CHROME_RESTART_COOLDOWN = 60 * 5
+
+# Carrega configurações de proteção do config
+PROTECAO = CONFIG.get('protecao', {})
+LIMITE_REQUISICOES_DIA = PROTECAO.get('limite_requisicoes_dia', 3000)
+REFRESH_INTERVAL_1 = PROTECAO.get('refresh_interval_1', 7200)
+REFRESH_INTERVAL_2 = PROTECAO.get('refresh_interval_2', 1200)
+CHROME_RESTART_COOLDOWN = PROTECAO.get('chrome_restart_cooldown', 300)
 # ================= TELEGRAM BOT (ADICIONADO) =================
 TELEGRAM_TOKEN = ""
 TELEGRAM_CHAT_ID = ""
@@ -284,7 +287,6 @@ def _resumir_payload(payload):
     return operation
 
 # ==================================================================================
-#  SEÇÃO 7: API ZÉ DELIVERY
 # ==================================================================================
 # Responsável por: Fazer requisições HTTP seguras à API do Zé Delivery com
 # proteção contra detecção (User-Agent, delays aleatórios, tratamento de erros).
