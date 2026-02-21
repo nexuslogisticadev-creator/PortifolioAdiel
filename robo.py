@@ -487,26 +487,37 @@ def imprimir_resumo_extrato(nome_motoboy, lista_pedidos, qtd_8, qtd_11, total_va
     except Exception as e:
         print(f"❌ Erro ao imprimir extrato: {e}")
 
-def imprimir_relatorio_canceladas(lista_canceladas):
+def imprimir_relatorio_canceladas(lista_canceladas, data_relatorio=None):
     if not TEM_IMPRESSORA: return
     try:
-        print(f"🖨️ Imprimindo RELATÓRIO DE CANCELAMENTOS...")
+        print(f"🖨️ Imprimindo RELATORIO DE CANCELAMENTOS...")
         impressora_padrao = win32print.GetDefaultPrinter()
         hPrinter = win32print.OpenPrinter(impressora_padrao)
+        data_print = data_relatorio if data_relatorio else datetime.now().strftime('%d-%m-%Y')
         try:
             hJob = win32print.StartDocPrinter(hPrinter, 1, ("Relatorio_Canceladas", None, "RAW"))
             try:
                 win32print.StartPagePrinter(hPrinter)
                 cupom = CMD_INIT + CMD_CENTER
                 cupom += CMD_BOLD_ON + CMD_DOUBLE_H + b"CANCELADOS\n" + CMD_NORMAL + CMD_BOLD_OFF
-                cupom += f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n".encode('cp850') + b"================================\n"
-                cupom += CMD_LEFT + CMD_BOLD_ON + b"ID PEDIDO         STATUS\n" + CMD_BOLD_OFF
-                for p in lista_canceladas:
-                    id_ped = str(p['numero']).ljust(15)
-                    st = p['status'].replace("POC_", "").replace("USER_", "").replace("SYS_", "")[:15]
-                    cupom += f"{id_ped} {st}\n".encode('cp850', errors='ignore')
-                cupom += b"--------------------------------\n" + CMD_CENTER + CMD_BOLD_ON
-                cupom += f"TOTAL: {len(lista_canceladas)}\n".encode('cp850') + CMD_NORMAL + b"\n\n\n" + CMD_CUT
+                cupom += f"Data: {data_print}\n".encode('cp850', errors='ignore')
+                cupom += b"================================\n"
+                
+                if not lista_canceladas:
+                    cupom += CMD_LEFT + b"Nenhum pedido cancelado encontrado.\n"
+                else:
+                    for p in lista_canceladas:
+                        cupom += CMD_LEFT
+                        cupom += CMD_BOLD_ON + f"PEDIDO: {p.get('numero', 'N/A')} ({p.get('hora', 'N/A')})\n".encode('cp850', errors='ignore') + CMD_BOLD_OFF
+                        cupom += f"Cliente: {p.get('cliente', 'N/A')[:25]}\n".encode('cp850', errors='ignore')
+                        cupom += f"Bairro:  {p.get('bairro', 'N/A')[:25]}\n".encode('cp850', errors='ignore')
+                        st = p.get('status', '').replace("POC_", "").replace("USER_", "").replace("SYS_", "")
+                        cupom += f"Status:  {st}\n".encode('cp850', errors='ignore')
+                        cupom += b"--------------------------------\n"
+
+                cupom += CMD_CENTER + CMD_BOLD_ON
+                cupom += f"TOTAL: {len(lista_canceladas)}\n".encode('cp850', errors='ignore')
+                cupom += CMD_NORMAL + b"\n\n\n" + CMD_CUT
                 win32print.WritePrinter(hPrinter, cupom)
                 win32print.EndPagePrinter(hPrinter)
             finally:
@@ -608,6 +619,12 @@ def get_caminho_excel():
     agora = datetime.now()
     if agora.hour < 10: agora -= timedelta(days=1)
     data_str = agora.strftime('%d-%m-%Y')
+    return os.path.join(get_caminho_base(), f'Controle_Financeiro_{data_str}.xlsx')
+
+def get_caminho_excel_por_data(data_str):
+    """Retorna o caminho do Excel para uma data específica ('dd-mm-yyyy')."""
+    if not data_str:
+        return get_caminho_excel()
     return os.path.join(get_caminho_base(), f'Controle_Financeiro_{data_str}.xlsx')
 
 def inicializar_excel_agora():
@@ -1191,8 +1208,9 @@ def fazer_barulho():
 
 def processar_relatorio_canceladas(data_filtro=None):
     lista = []
-    arquivo = get_caminho_excel()
-    if not os.path.exists(arquivo): return "Sem dados."
+    arquivo = get_caminho_excel_por_data(data_filtro)
+    if not os.path.exists(arquivo):
+        return f"Planilha para data {data_filtro} nao encontrada."
     try:
         wb = openpyxl.load_workbook(arquivo, data_only=True)
         ws = wb["EXTRATO DETALHADO"]
@@ -1200,10 +1218,17 @@ def processar_relatorio_canceladas(data_filtro=None):
             if row and row[5]:
                 st = str(row[5]).upper()
                 if any(x in st for x in STATUS_CANCELADOS_LISTA):
-                    lista.append({'numero': row[2], 'status': st})
-        imprimir_relatorio_canceladas(lista)
-        return f"Relatório de Cancelados gerado: {len(lista)} pedidos."
-    except: return "Erro ao gerar relatório."
+                    lista.append({
+                        'hora': str(row[1]),
+                        'numero': str(row[2]),
+                        'cliente': str(row[3]),
+                        'bairro': str(row[4]),
+                        'status': st
+                    })
+        imprimir_relatorio_canceladas(lista, data_filtro)
+        return f"Relatorio de Cancelados gerado: {len(lista)} pedidos."
+    except Exception as e:
+        return f"Erro ao gerar relatorio de cancelados: {e}"
 
 def processar_impressao_individual(texto):
     nome = limpar_texto_busca(texto.replace("imprimir", ""))
@@ -2307,6 +2332,62 @@ def imprimir_extrato_por_nome(nome_alvo, data_str):
     print("⚠️ NADA ENCONTRADO.")
     return False
 
+def processar_relatorio_retiradas(data_str):
+    """Busca e imprime todas as retiradas de uma data específica."""
+    print(f"\n🖨️ COMANDO RECEBIDO: Imprimir todas as retiradas da data {data_str}")
+    arquivo_excel = get_caminho_excel_por_data(data_str)
+
+    if not os.path.exists(arquivo_excel):
+        print(f"❌ ARQUIVO NÃO ENCONTRADO! Verifique se a data {data_str} está certa.")
+        return False
+
+    wb = openpyxl.load_workbook(arquivo_excel, data_only=True)
+    ws = wb["EXTRATO DETALHADO"]
+    pedidos_retirada = []
+    total_valor_retirada = 0.0
+
+    print("🔎 --- INICIANDO VARREDURA DE RETIRADAS NO EXCEL ---")
+
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if not row or not row[6]:
+            continue
+        
+        motoboy_excel_original = str(row[6])
+        status = str(row[5]).upper()
+        val = float(row[8]) if row[8] else 0.0
+
+        # Condição: Motoboy é 'RETIRADA' ou valor é 0, e não está cancelado.
+        if ("RETIRADA" in motoboy_excel_original.upper() or val == 0.0) and not any(x in status for x in STATUS_CANCELADOS_LISTA):
+            total_valor_retirada += val 
+            pedidos_retirada.append({
+                'numero': str(row[2]),
+                'data': str(row[0]),
+                'hora': str(row[1]),
+                'cliente': str(row[3]),
+                'bairro': str(row[4]),
+                'motoboy': str(row[6]),
+                'valor': val,
+                'itens': str(row[9]) if len(row) > 9 and row[9] else ""
+            })
+
+    print(f"🏁 Fim da varredura. Total de retiradas encontradas: {len(pedidos_retirada)}")
+    
+    if pedidos_retirada:
+        print("🖨️ Imprimindo tickets de retirada...")
+        imprimir_lote_continuo(pedidos_retirada)
+        time.sleep(2)
+        print("🖨️ Imprimindo resumo final de retiradas...")
+        # Usamos a função de extrato, mas com dados zerados de entrega e total.
+        imprimir_resumo_extrato(
+            "TODAS RETIRADAS", pedidos_retirada, 0, 0, total_valor_retirada,
+            data_personalizada=data_str, vale_total=0.0
+        )
+        print("✅ Impressão de retiradas completa!")
+        return True
+
+    print("⚠️ Nenhuma retirada encontrada para a data.")
+    return False
+
 def processar_comando_painel():
     if not os.path.exists(ARQUIVO_COMANDO): return
 
@@ -2387,6 +2468,12 @@ def processar_comando_painel():
             res = processar_relatorio_canceladas(data_cancel)
             print(res)
 
+        elif cmd.startswith("IMPRIMIR_RETIRADAS"):
+            parts = cmd.split(":")
+            data_retirada = parts[1] if len(parts) > 1 else None
+            print(f"🖨️ COMANDO DO PAINEL: Retiradas (Data: {data_retirada if data_retirada else 'Hoje'})")
+            processar_relatorio_retiradas(data_retirada)
+
         elif cmd.startswith("ENVIAR_WHATSAPP:"):
             mensagem = cmd.split(":", 1)[1]
             print(f"📤 COMANDO DO PAINEL: Enviar alerta no WhatsApp")
@@ -2422,7 +2509,7 @@ def verificar_comandos_telegram():
         params = {"offset": LAST_UPDATE_ID + 1, "timeout": 1}
         
         # Usamos requests padrão para evitar conflitos de thread/ssl do cffi
-        r = requests.get(url, params=params, timeout=5)
+        r = requests.get(url, params=params, timeout=15)
         
         if r.status_code == 200:
             dados = r.json()

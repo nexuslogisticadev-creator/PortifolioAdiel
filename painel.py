@@ -1725,19 +1725,25 @@ class PainelUltra(ctk.CTk):
             self.fr_quick_actions, text="HISTORICO", command=self.verificar_historico,
             fg_color=COR_CARD_BG, border_width=1, border_color=COR_BORDA,
             text_color=COR_TEXT_SEC, height=30, hover_color="#333", font=("Segoe UI Bold", 12)
-        ).grid(row=0, column=0, sticky="ew", padx=8, pady=(10, 6))
+        ).grid(row=0, column=0, sticky="ew", padx=8, pady=(6, 3))
 
         ctk.CTkButton(
             self.fr_quick_actions, text="ESTOQUE", command=self.atualizar_estoque_manual,
             fg_color=COR_CARD_BG, border_width=1, border_color=COR_BORDA,
             text_color=COR_TEXT_SEC, height=30, hover_color="#333", font=("Segoe UI Bold", 12)
-        ).grid(row=1, column=0, sticky="ew", padx=8, pady=6)
+        ).grid(row=1, column=0, sticky="ew", padx=8, pady=3)
 
         ctk.CTkButton(
             self.fr_quick_actions, text="CANCELADAS", command=self.enviar_canceladas,
             fg_color="transparent", border_width=1, border_color=COR_DANGER,
             text_color=COR_DANGER, height=30, hover_color="#2b1111", font=("Segoe UI Bold", 12)
-        ).grid(row=2, column=0, sticky="ew", padx=8, pady=(6, 10))
+        ).grid(row=2, column=0, sticky="ew", padx=8, pady=3)
+        
+        ctk.CTkButton(
+            self.fr_quick_actions, text="IMPRIMIR RETIRADAS", command=self.imprimir_todas_retiradas,
+            fg_color=COR_CARD_BG, border_width=1, border_color=COR_BORDA,
+            text_color=COR_TEXT_SEC, height=30, hover_color="#333", font=("Segoe UI Bold", 12)
+        ).grid(row=3, column=0, sticky="ew", padx=8, pady=(3, 6))
 
         fr_acoes = ctk.CTkFrame(parent, fg_color=COR_CARD_BG, height=70, corner_radius=12, border_width=1, border_color=COR_BORDA)
         fr_acoes.grid(row=3, column=0, sticky="ew", pady=(0, 20))
@@ -3673,6 +3679,12 @@ class PainelUltra(ctk.CTk):
             self.mostrar_toast(f"Imprimindo: {nome_selecionado}", "success")
         else:
             self.mostrar_toast("Selecione um motoboy!", "error")
+
+    def imprimir_todas_retiradas(self):
+        data = self.data_var.get()
+        with open(ARQUIVO_COMANDO, 'w', encoding='utf-8') as f:
+            f.write(f"IMPRIMIR_RETIRADAS:{data}")
+        self.mostrar_toast("Gerando Relatório de Retiradas...", "info")
 
     def enviar_canceladas(self):
         with open(ARQUIVO_COMANDO, 'w', encoding='utf-8') as f:
