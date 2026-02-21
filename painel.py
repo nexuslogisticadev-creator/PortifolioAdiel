@@ -1,4 +1,3 @@
-
 from collections import deque
 import customtkinter as ctk
 import tkinter as tk
@@ -3736,11 +3735,11 @@ class PainelUltra(ctk.CTk):
             with open(ARQUIVO_ALERTAS, 'r', encoding='utf-8') as f:
                 alertas = json.load(f)
             
-            # Filtra apenas alertas de 9+ minutos (≥ 570 segundos)
+            # Filtra apenas alertas de 9min55s ou mais (≥ 595 segundos)
             alertas_filtrados = []
             for alerta in alertas:
                 tempo_total_s = int(alerta.get("tempo_minutos", 0)) * 60 + int(alerta.get("tempo_segundos", 0))
-                if tempo_total_s >= 570:  # 9min30s ou mais
+                if tempo_total_s >= 595:  # 9min55s ou mais
                     alertas_filtrados.append(alerta)
             
             if not alertas_filtrados:
@@ -3909,6 +3908,17 @@ class PainelUltra(ctk.CTk):
                 
         except Exception as e:
             print(f"Erro ao remover alerta: {e}")
+
+    def dispensar_todos_alertas(self):
+        """Remove todos os alertas de atraso do arquivo e da interface."""
+        try:
+            if os.path.exists(ARQUIVO_ALERTAS):
+                with open(ARQUIVO_ALERTAS, 'w', encoding='utf-8') as f:
+                    json.dump([], f, indent=2, ensure_ascii=False)
+            self.fr_alertas_atraso.grid_remove()
+            self.mostrar_toast("Todos os avisos foram dispensados!", "success")
+        except Exception as e:
+            self.mostrar_toast(f"Erro ao dispensar avisos: {e}", "error")
 
 # ==================================================================================
 #  SEÇÃO 14: INICIALIZAÇÃO DO PAINEL (MAIN LOOP)
