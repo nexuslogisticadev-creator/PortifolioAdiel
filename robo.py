@@ -109,8 +109,8 @@ def carregar_configuracoes():
         configuracoes = {
             'nome_grupo': config.get('grupo_whatsapp', 'Zé Número cliente'),
             'endereco_loja': config.get('endereco_loja', 'Rua Sete de Setembro 1178, Chapecó'),
-            'email': config.get('email_ze', ''),
-            'senha': config.get('senha_ze', ''),
+            'email': config.get('email', ''),
+            'senha': config.get('senha', ''),
             'telegram_token': config.get('telegram_token', ''),
             'telegram_chat_id': config.get('telegram_chat_id', ''),
             'path_backup': config.get('path_backup', ''),
@@ -1258,7 +1258,7 @@ def refresh_whatsapp_periodically():
         return
 
     agora = time.time()
-    if agora - LAST_WHATSAPP_REFRESH < WHATSAPP_REFRESH_INTERVAL:
+    if agora - LAST_WHATSAPP_REFRESH < REFRESH_INTERVAL_1:
         return
 
     try:
@@ -1302,44 +1302,46 @@ def _eh_sessao_invalida(exc):
 def _tratar_timeout_webdriver(contexto, exc):
     print(f"⚠️ {contexto}: {exc}")
     if _eh_timeout_webdriver(exc):
-        print("🧯 WebDriver sem resposta. Tentando recuperar Zé Delivery...")
-        _recarregar_ze_delivery("timeout webdriver")
+        print("🧯 WebDriver sem resposta. Tentando recuperar página principal...")
+        _recarregar_pagina_principal("timeout webdriver")
     if _eh_sessao_invalida(exc):
-        print("🔁 Sessao do Chrome invalida. Tentando reiniciar...")
+        print("🔁 Sessao do navegador invalida. Tentando reiniciar...")
         _reiniciar_chrome_se_preciso("sessao invalida")
 
-def _recarregar_ze_delivery(motivo):
+def _recarregar_pagina_principal(motivo):
     global driver
     if not driver:
         return
 
     try:
         handle_atual = driver.current_window_handle
-        handle_ze = None
+        handle_principal = None
         for handle in driver.window_handles:
             driver.switch_to.window(handle)
             try:
                 url = driver.current_url
             except WebDriverException:
                 continue
-            if "seu.ze.delivery" in url or "parceiros.ze.delivery" in url:
-                handle_ze = handle
+            url_principal = CONFIG.get('url_principal', CONFIG.get('url_api', 'https://pagina-principal.com/'))
+            if url_principal.split('//')[-1].split('/')[0] in url:
+                handle_principal = handle
                 break
 
-        if handle_ze:
-            print(f"🔄 Recarregando Zé Delivery ({motivo})...")
+        if handle_principal:
+            print(f"🔄 Recarregando página principal ({motivo})...")
             driver.refresh()
             WebDriverWait(driver, 60).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
         else:
-            print(f"🧭 Abrindo Zé Delivery em nova aba ({motivo})...")
-            driver.execute_script("window.open('https://seu.ze.delivery/', '_blank');")
+            print(f"🧭 Abrindo página principal em nova aba ({motivo})...")
+            url_principal = CONFIG.get('url_principal', CONFIG.get('url_api', 'https://pagina-principal.com/'))
+            driver.execute_script(f"window.open('{url_principal}', '_blank');")
 
         if handle_atual in driver.window_handles:
             driver.switch_to.window(handle_atual)
     except Exception as e:
-        print(f"⚠️ Falha ao recuperar Zé Delivery: {e}")
+        print(f"⚠️ Falha ao recuperar página principal: {e}")
 
 def _executar_com_retentativas(contexto, func, tentativas=2, pausa=2):
     for tentativa in range(1, tentativas + 1):
@@ -1386,21 +1388,21 @@ def _reiniciar_chrome_se_preciso(motivo):
     except Exception as e:
         print(f"❌ Falha ao reiniciar Chrome: {e}")
 
-def refresh_ze_delivery_periodically():
-    global LAST_ZE_REFRESH, driver
+def refresh_main_periodically():
+    global LAST_MAIN_REFRESH, driver
     if not driver:
         return
 
     agora = time.time()
-    if agora - LAST_ZE_REFRESH < ZE_DELIVERY_REFRESH_INTERVAL:
+    if agora - LAST_MAIN_REFRESH < REFRESH_INTERVAL_2:
         return
 
     try:
-        _recarregar_ze_delivery("manutencao")
+        _recarregar_pagina_principal("manutencao")
     except Exception as e:
-        print(f"⚠️ Erro ao atualizar Zé Delivery: {e}")
+        print(f"⚠️ Erro ao atualizar página principal: {e}")
     finally:
-        LAST_ZE_REFRESH = agora
+        LAST_MAIN_REFRESH = agora
 
 # ================= CONFIGURAÇÃO E LOGIN AUTOMÁTICO =================
 ARQUIVO_COMANDO = 'comando_imprimir.txt'
@@ -1420,7 +1422,7 @@ def carregar_credenciais():
     if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
         print(f"📱 Telegram Configurado! (ID: {TELEGRAM_CHAT_ID})")
     
-    return CONFIG.get('email_ze'), CONFIG.get('senha_ze')
+    return CONFIG.get('email'), CONFIG.get('senha')
 
 def carregar_motoboys_do_painel():
     """Atualiza lista de motoboys do CONFIG global"""
@@ -1442,7 +1444,7 @@ def carregar_motoboys_do_painel():
 #  SEÇÃO 6: CHROME E NAVEGAÇÃO WEB
 # ==================================================================================
 # Responsável por: Inicializar e gerenciar instância persistente do Chrome
-# Selenium para automação de navegação no WhatsApp e Zé Delivery.
+# Selenium para automação de navegação no WhatsApp 
 # ==================================================================================
 
 def iniciar_chrome_persistente():
@@ -1452,12 +1454,7 @@ def iniciar_chrome_persistente():
     perfil_path = os.path.join(get_caminho_base(), "perfil_chrome")
     if not os.path.exists(perfil_path): os.makedirs(perfil_path)
     
-    try:
-        print("🧹 Limpando processos antigos...")
-        subprocess.call("taskkill /F /IM chrome.exe /T", shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-        subprocess.call("taskkill /F /IM chromedriver.exe /T", shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-        time.sleep(2)
-    except: pass
+    # Removido: não finaliza mais outros Chromes abertos
     
     opts = Options()
     opts.add_argument(f"--user-data-dir={perfil_path}") 
@@ -1476,7 +1473,8 @@ def iniciar_chrome_persistente():
             """
         })
         
-        driver.get("https://seu.ze.delivery/")
+        url_principal = CONFIG.get('url_principal', CONFIG.get('url_api', 'https://pagina-principal.com/'))
+        driver.get(url_principal)
         
         email_cfg, senha_cfg = carregar_credenciais()
         if email_cfg and senha_cfg:
@@ -3312,12 +3310,12 @@ def start():
             if not _driver_ativo():
                 _reiniciar_chrome_se_preciso("healthcheck")
             refresh_whatsapp_periodically()
-            refresh_ze_delivery_periodically()
+            refresh_main_periodically()
             garantir_foco_no_grupo() 
             
             processar_comando_painel()      # Comandos da Interface
             verificar_comandos_telegram()   # <--- ESSENCIAL: Comandos do Telegram
-            monitorar()                     # API do Zé
+            monitorar()                     # API
             verificar_solicitacoes_whatsapp() # Ler Grupo Zap
 
             # Rechecagem rapida para reduzir latencia de comandos do painel
@@ -3331,7 +3329,14 @@ def start():
             break
         except Exception as e: 
             print(f"Erro Fatal: {e}")
+            print("Tentando reiniciar o robô em 5 segundos...")
             time.sleep(5)
+            try:
+                # Tenta reinicializar o Chrome e seguir o loop
+                iniciar_chrome_persistente()
+            except Exception as e2:
+                print(f"Falha ao reiniciar Chrome: {e2}")
+                time.sleep(10)
 
 if __name__ == "__main__":
     start()
