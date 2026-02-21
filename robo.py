@@ -325,19 +325,7 @@ def requisicao_segura(payload):
     esperar_humano(1, 3)
     
     # 6. HEADERS COMPLETOS E REALISTAS
-    headers_completos = {
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Content-Type": "application/json",
-        "Origin": "https://parceiros.ze.delivery",
-        "Referer": "https://parceiros.ze.delivery/",
-        "DNT": "1",
-        "Connection": "keep-alive",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-site"
-    }
+    headers_completos = CONFIG.get('headers_api', {})
 
     try:
         # USA CHROME 120 NA REDE (Impersonate)
