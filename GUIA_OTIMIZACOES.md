@@ -259,5 +259,5 @@ Comparação ante/depois:
 
 **Versão:** 1.0 Otimizada  
 **Data:** 13/02/2026  
-**Desenvolvido por:** GitHub Copilot  
+**Desenvolvido por:** Adiel Alves
 **Status:** ✅ Pronto para Produção

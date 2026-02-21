@@ -221,5 +221,5 @@ self.after(2000, self._auto_refresh_inteligente)
 ---
 
 **Data**: 13/02/2026
-**Autor**: GitHub Copilot
+**Autor**: Adiel Alves
 **Versão**: 1.0
