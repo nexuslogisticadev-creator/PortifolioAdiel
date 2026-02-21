@@ -120,7 +120,13 @@ def carregar_configuracoes():
             'google_sheets': config.get('google_sheets', {}),
             'debug_alerta_retirada_todos': config.get('debug_alerta_retirada_todos', False),
             'alerta_retirada_auto': config.get('alerta_retirada_auto', False),
-            'whatsapp_mencao_ativa': config.get('whatsapp_mencao_ativa', False)
+            'whatsapp_mencao_ativa': config.get('whatsapp_mencao_ativa', False),
+            'url_api': config.get('url_api', ''),
+            'url_principal': config.get('url_principal', ''),
+            'headers_api': config.get('headers_api', {}),
+            'api_request': config.get('api_request', {}),
+            'protecao': config.get('protecao', {}),
+            'categorias_produtos': config.get('categorias_produtos', {}),
         }
         
         print("✅ Configurações carregadas do config.json")
