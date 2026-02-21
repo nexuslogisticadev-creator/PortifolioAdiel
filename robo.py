@@ -238,7 +238,7 @@ def enviar_telegram(mensagem):
             "text": mensagem, 
             "parse_mode": "Markdown" 
         }
-        cffi_requests.post(url, json=payload, timeout=5)
+        cffi_requests.post(url, json=payload, timeout=20)
     except Exception as e:
         print(f"⚠️ Erro Telegram: {e}")
 
@@ -340,8 +340,8 @@ def requisicao_segura(payload):
         # Parâmetros de requisição da API vindos do config
         API_REQUEST = CONFIG.get('api_request', {})
         impersonate_val = API_REQUEST.get('impersonate', None)
-        timeout_min = API_REQUEST.get('timeout_min', 12)
-        timeout_max = API_REQUEST.get('timeout_max', 18)
+        timeout_min = API_REQUEST.get('timeout_min', 20)
+        timeout_max = API_REQUEST.get('timeout_max', 30)
         cookie_token_key = API_REQUEST.get('cookie_token_key', 'token')
         r = cffi_requests.post(
             URL_API,
