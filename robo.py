@@ -1678,7 +1678,7 @@ def traduzir_status(status_raw):
         "IN_TRANSIT": "🛵 Em Rota", "DM_EN_ROUTE": "🛵 Em Rota", 
         "EM_ROUTE": "🛵 Em Rota", "DELIVERED": "✅ Entregue", 
         "POC_DELIVERED": "✅ Entregue", "FINISHED": "🏁 Finalizado", 
-        "CANCELLED": "❌ Cancelado"
+        "CANCELLED": "❌ Cancelado", "DM_PICKED_UP": "🛵 Retirado p/ Entregador"
     }
     return mapa.get(str(status_raw).upper(), status_raw)        
 def buscar_telefone(num):
@@ -1908,7 +1908,6 @@ def verificar_solicitacoes_whatsapp():
                             status_trad = traduzir_status(status_p)
                             status_rua = ['DISPATCHED', 'IN_TRANSIT', 'EN_ROUTE', 'EM_ROUTE', 'DM_EN_ROUTE', 'DM_PICKED_UP']
                             emoji = "🛵" if status_p in status_rua else "📦"
-                            
                             msg = (f"{emoji} *{status_trad}*\n"
                                    f"📦 {pid}\n"
                                    f"👤 *{p['customer']['name'].upper()}*\n"
