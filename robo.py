@@ -109,8 +109,8 @@ def carregar_configuracoes():
         configuracoes = {
             'nome_grupo': config.get('grupo_whatsapp', 'Zé Número cliente'),
             'endereco_loja': config.get('endereco_loja', 'Rua Sete de Setembro 1178, Chapecó'),
-            'email_ze': config.get('email_ze', ''),
-            'senha_ze': config.get('senha_ze', ''),
+            'email': config.get('email_ze', ''),
+            'senha': config.get('senha_ze', ''),
             'telegram_token': config.get('telegram_token', ''),
             'telegram_chat_id': config.get('telegram_chat_id', ''),
             'path_backup': config.get('path_backup', ''),
