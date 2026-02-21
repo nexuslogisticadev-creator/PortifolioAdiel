@@ -2312,16 +2312,10 @@ class PainelUltra(ctk.CTk):
 
     def identificar_categoria(self, nome_produto):
         nome = str(nome_produto).lower()
-        regras = {
-            "🍺 CERVEJAS": ["skol", "brahma", "antarctica", "budweiser", "heineken", "spaten", "corona", "original", "bohemia", "polar", "subzero", "serrana", "bavaria", "kaiser", "proibida", "becks", "stella", "eisenbahn", "michelob"],
-            "🍸 DESTILADOS": ["vodka", "whisky", "gin", "cachaça", "rum", "tequila", "licor", "campari", "aperol", "velho barreiro", "51", "smirnoff", "absolut", "jack", "red label", "white horse", "passport", "ballantines", "chivas", "conhaque", "dreher", "sakerita", "old parr", "montilla", "malibu"],
-            "🥤 NÃO ALCOÓLICOS": ["coca", "pepsi", "fanta", "guaraná", "sprite", "sukita", "soda", "agua", "água", "h2oh", "gatorade", "suco", "del valle", "tonica", "refrigerante"],
-            "⚡ ENERGÉTICOS": ["red bull", "monster", "baly", "vibe", "tnt"],
-            "🍷 VINHOS & ICES": ["vinho", "cantina", "pergola", "pérgola", "sangue de boi", "chalise", "canção", "catuaba", "ice", "beats", "syn", "galiotto", "dom bosco", "cider"],
-            "🍟 MERCEARIA & DIVERSOS": ["gelo", "carvao", "carvão", "salgadinho", "batata", "amendoim", "doritos", "ruffles", "cheetos", "fandangos", "chocolate", "halls", "trident", "seda", "cigarro", "fumo", "isqueiro", "copo", "baconzitos", "cebolitos", "torcida", "kit kat"]
-        }
+        regras = self.config_data.get("categorias_produtos", {})
         for categoria, palavras in regras.items():
-            if any(p in nome for p in palavras): return categoria
+            if any(p in nome for p in palavras):
+                return categoria
         return "📦 OUTROS"
 
     def atualizar_tabela_estoque(self, filtro=""):
