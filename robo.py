@@ -60,6 +60,7 @@ import re
 import unicodedata
 import json
 import subprocess
+import psutil
 from datetime import datetime, timedelta
 
 # --- BIBLIOTECAS CHROME (ATUALIZADO) ---
@@ -1468,16 +1469,26 @@ def iniciar_chrome_persistente():
     
     perfil_path = os.path.join(get_caminho_base(), "perfil_chrome")
     if not os.path.exists(perfil_path): os.makedirs(perfil_path)
-    
-    # Removido: não finaliza mais outros Chromes abertos
-    
+
+    # Mata apenas o Chrome iniciado pelo robô (com perfil_chrome)
+    def matar_chrome_do_robo():
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                if proc.info['name'] == 'chrome.exe' and perfil_path in ' '.join(proc.info['cmdline']):
+                    proc.kill()
+                    print(f"Chrome do robô finalizado (PID {proc.info['pid']})")
+            except Exception as e:
+                print(f"Erro ao finalizar Chrome: {e}")
+
+    matar_chrome_do_robo()
+
     opts = Options()
     opts.add_argument(f"--user-data-dir={perfil_path}") 
     opts.add_argument("--disable-blink-features=AutomationControlled")
     opts.add_experimental_option("excludeSwitches", ["enable-automation"])
     opts.add_experimental_option("useAutomationExtension", False)
     opts.add_argument("--log-level=3") 
-    
+
     try:
         driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
         driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
