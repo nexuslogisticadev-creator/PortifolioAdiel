@@ -1,3 +1,13 @@
+# ==================================================================================
+# INTEGRAÇÃO E SINCRONIA ENTRE SISTEMAS
+# ----------------------------------------------------------------------------------
+# Este arquivo implementa o PAINEL (painel.py), responsável por enviar comandos
+# ao robô principal (robo.py) via 'comando_imprimir.txt'.
+# O bot Telegram (telegram_bot.py) também pode enviar comandos ao robô via 'telegram_command.txt'.
+# Todos os comandos disponíveis devem ser mantidos sincronizados entre os três sistemas.
+# O painel envia comandos para execução pelo robô e pode receber status/retornos.
+# Consulte os comentários de integração ao longo do código para pontos de comunicação.
+# ==================================================================================
 from collections import deque
 import customtkinter as ctk
 import tkinter as tk
@@ -72,11 +82,15 @@ FONT_TITLE = ("Segoe UI Bold", 26)     # Títulos maiores
 FONT_MONO = ("Cascadia Code", 13)      # Fonte monospace moderna
 
 ARQUIVO_COMANDO = 'comando_imprimir.txt'
+# INTEGRAÇÃO: Este arquivo é usado para enviar comandos do painel ao robo.py.
+# O robô lê e processa comandos deste arquivo (ver processar_comando_painel em robo.py).
+# Mantenha os comandos sincronizados entre painel.py, robo.py e telegram_bot.py.
 ARQUIVO_CONFIG = 'config.json'
 ARQUIVO_ESTOQUE = 'estoque.json'
 ARQUIVO_ALERTAS = 'alertas_atraso.json'
 ARQUIVO_FECHAMENTO_STATUS = 'fechamento_status.json'
 ARQUIVO_MEMORIA_FECH = 'memoria_fechamento.json'
+ARQUIVO_FORNECEDORES = 'fornecedores.json'
 
 # ================= PERFORMANCE SETTINGS =================
 # Ajuste fino para reduzir consumo quando o painel fica aberto.
@@ -304,6 +318,8 @@ class PainelUltra(ctk.CTk):
         self._aba_atual = None
 
         self.processo_robo = None
+        # INTEGRAÇÃO: Variável de controle do processo do robô. O painel pode iniciar/parar o robô
+        # e enviar comandos via comando_imprimir.txt. Consulte também telegram_bot.py para integração remota.
         self.fila_logs = queue.Queue()
         self._ui_queue = queue.Queue()
         self.robo_rodando = False
@@ -750,6 +766,14 @@ class PainelUltra(ctk.CTk):
             qtd_w = 75 if mode == "compact" else (85 if mode == "normal" else 95)
             self.ent_qtd.configure(width=qtd_w)
         
+        if hasattr(self, "ent_qtd_minima"):
+            qtd_minima_w = 90 if mode == "compact" else (100 if mode == "normal" else 110)
+            self.ent_qtd_minima.configure(width=qtd_minima_w)
+
+        if hasattr(self, "combo_fornecedor"):
+            forn_w = 180 if mode == "compact" else (210 if mode == "normal" else 240)
+            self.combo_fornecedor.configure(width=forn_w)
+        
         if hasattr(self, "combo_vale_moto"):
             vale_w = 180 if mode == "compact" else (210 if mode == "normal" else 240)
             try:
@@ -806,12 +830,13 @@ class PainelUltra(ctk.CTk):
 
         if hasattr(self, "tree_estoque"):
             if mode == "compact":
-                widths = [220, 90, 110, 90, 130]
+                widths = [180, 80, 80, 80, 90, 100]
             elif mode == "normal":
-                widths = [260, 100, 120, 100, 150]
+                widths = [220, 100, 90, 100, 110, 120]
             else:
-                widths = [300, 110, 140, 110, 170]
-            cols = ["PRODUTO", "NIVEL", "STATUS", "PRECO", "FORNECEDOR"]
+                widths = [250, 120, 110, 130, 110, 150]
+            
+            cols = ["PRODUTO", "CATEGORIA", "NIVEL", "STATUS", "PRECO", "FORNECEDOR"]
             for col, w in zip(cols, widths):
                 self.tree_estoque.column(col, width=w)
 
@@ -2101,7 +2126,7 @@ class PainelUltra(ctk.CTk):
     def setup_aba_estoque(self, parent):
         # Configuração do Grid Principal da Aba
         parent.grid_columnconfigure(0, weight=1)
-        parent.grid_rowconfigure(3, weight=1)
+        parent.grid_rowconfigure(5, weight=1)
 
         # --- 1. Título ---
         ctk.CTkLabel(parent, text="CONTROLE DE ESTOQUE (AUTOMÁTICO)", font=FONT_TITLE, text_color=COR_AMARELO).grid(row=0, column=0, pady=(20, 10))
@@ -2116,34 +2141,82 @@ class PainelUltra(ctk.CTk):
 
         ctk.CTkButton(fr_busca, text="BUSCAR", command=self.comando_buscar, width=110, height=38, fg_color=COR_CARD_BG, hover_color=COR_BORDA).pack(side="right")
 
+        # --- Filtros de Tabela ---
+        fr_filtros = ctk.CTkFrame(parent, fg_color="transparent")
+        fr_filtros.grid(row=2, column=0, sticky="ew", padx=30, pady=10)
+
+        ctk.CTkLabel(fr_filtros, text="Filtrar por: ", font=FONT_MAIN, text_color=COR_TEXT_SEC).pack(side="left", padx=(0, 10))
+
+        self.combo_filtro_categoria = ctk.CTkComboBox(fr_filtros, values=["Todas as Categorias"] + self.ESTOQUE_CATEGORIAS, width=200, height=38, state="readonly")
+        self.combo_filtro_categoria.set("Todas as Categorias")
+        self.combo_filtro_categoria.pack(side="left", padx=5)
+        self.combo_filtro_categoria.bind("<<ComboboxSelected>>", self._aplicar_filtros_estoque)
+
+        self.combo_filtro_fornecedor = ctk.CTkComboBox(fr_filtros, values=["Todos os Fornecedores", "-"], width=200, height=38, state="readonly")
+        self.combo_filtro_fornecedor.set("Todos os Fornecedores")
+        self.combo_filtro_fornecedor.pack(side="left", padx=5)
+        self.combo_filtro_fornecedor.bind("<<ComboboxSelected>>", self._aplicar_filtros_estoque)
+        self.combo_filtro_fornecedor.bind("<Button-1>", self._atualizar_combo_fornecedores_filtro) # Atualiza a lista ao clicar
+
         # --- 3. Frame de Inputs (Adicionar/Editar) ---
-        fr_inputs = ctk.CTkFrame(parent, fg_color=COR_CARD_BG, height=65)
-        fr_inputs.grid(row=2, column=0, sticky="ew", padx=30, pady=12)
+        fr_inputs = ctk.CTkFrame(parent, fg_color=COR_CARD_BG)
+        fr_inputs.grid(row=3, column=0, sticky="ew", padx=30, pady=12)
+        
+        # Grid para Labels e Entradas
+        for i in range(7): fr_inputs.grid_columnconfigure(i, weight=1)
 
-        self.ent_prod = ctk.CTkEntry(fr_inputs, placeholder_text="Nome do Produto", width=260, height=42)
-        self.ent_prod.pack(side="left", padx=12, pady=12)
+        # Coluna 0: Produto
+        ctk.CTkLabel(fr_inputs, text="PRODUTO", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=0, padx=10, pady=(10, 0), sticky="w")
+        self.ent_prod = ctk.CTkEntry(fr_inputs, placeholder_text="Ex: Heineken 330ml", height=40)
+        self.ent_prod.grid(row=1, column=0, padx=10, pady=(0, 15), sticky="ew")
 
-        self.ent_preco = ctk.CTkEntry(fr_inputs, placeholder_text="R$ Preço", width=110, height=42)
-        self.ent_preco.pack(side="left", padx=7, pady=12)
+        # Coluna 1: Preço
+        ctk.CTkLabel(fr_inputs, text="PREÇO (R$)", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=1, padx=5, pady=(10, 0), sticky="w")
+        self.ent_preco = ctk.CTkEntry(fr_inputs, placeholder_text="0.00", height=40)
+        self.ent_preco.grid(row=1, column=1, padx=5, pady=(0, 15), sticky="ew")
 
-        self.ent_qtd = ctk.CTkEntry(fr_inputs, placeholder_text="Qtd", width=90, height=42)
-        self.ent_qtd.pack(side="left", padx=7, pady=12)
+        # Coluna 2: Qtd Atual
+        ctk.CTkLabel(fr_inputs, text="ESTOQUE ATUAL", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=2, padx=5, pady=(10, 0), sticky="w")
+        self.ent_qtd = ctk.CTkEntry(fr_inputs, placeholder_text="0", height=40)
+        self.ent_qtd.grid(row=1, column=2, padx=5, pady=(0, 15), sticky="ew")
 
-        self.combo_cat = ctk.CTkComboBox(fr_inputs, values=self.ESTOQUE_CATEGORIAS, width=210, height=42, state="readonly")
-        self.combo_cat.set("Selecione a Categoria")
-        self.combo_cat.pack(side="left", padx=7, pady=12)
+        # Coluna 3: Qtd Mínima
+        ctk.CTkLabel(fr_inputs, text="AVISO MÍNIMO", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=3, padx=5, pady=(10, 0), sticky="w")
+        self.ent_qtd_minima = ctk.CTkEntry(fr_inputs, placeholder_text="3", height=40)
+        self.ent_qtd_minima.grid(row=1, column=3, padx=5, pady=(0, 15), sticky="ew")
 
-        ctk.CTkButton(fr_inputs, text="💾 SALVAR", command=self.add_produto, fg_color=COR_SUCCESS, text_color="#003300", font=FONT_BOLD, width=110).pack(side="left", padx=12)
-        ctk.CTkButton(fr_inputs, text="🧹 LIMPAR", command=self.limpar_campos, fg_color="transparent", border_width=1, border_color=COR_BORDA, text_color="silver", width=90).pack(side="left", padx=7)
+        # Coluna 4: Categoria
+        ctk.CTkLabel(fr_inputs, text="CATEGORIA", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=4, padx=5, pady=(10, 0), sticky="w")
+        self.combo_cat = ctk.CTkComboBox(fr_inputs, values=self.ESTOQUE_CATEGORIAS, height=40, state="readonly")
+        self.combo_cat.set("Selecione...")
+        self.combo_cat.grid(row=1, column=4, padx=5, pady=(0, 15), sticky="ew")
 
-        ctk.CTkButton(fr_inputs, text="🗑️", command=self.del_produto, fg_color="transparent", border_width=1, border_color=COR_DANGER, text_color=COR_DANGER, width=50).pack(side="right", padx=12)
-        ctk.CTkButton(fr_inputs, text="🛒 LISTA DE COMPRAS", command=self.gerar_lista_compras, fg_color="#E91E63", hover_color="#C2185B", font=FONT_BOLD, width=160).pack(side="right", padx=12)
+        # Coluna 5: Fornecedor
+        ctk.CTkLabel(fr_inputs, text="FORNECEDOR", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=5, padx=5, pady=(10, 0), sticky="w")
+        self.combo_fornecedor = ctk.CTkComboBox(fr_inputs, values=["-"], height=40, state="readonly")
+        self.combo_fornecedor.set("-")
+        self.combo_fornecedor.grid(row=1, column=5, padx=5, pady=(0, 15), sticky="ew")
+        self.combo_fornecedor.bind("<Button-1>", self._atualizar_combo_fornecedores)
+
+        # Coluna 6: Botão Add Fornecedor
+        ctk.CTkLabel(fr_inputs, text="NOVO FORN.", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=6, padx=(5, 10), pady=(10, 0), sticky="w")
+        ctk.CTkButton(fr_inputs, text="+", command=self.add_fornecedor_dialog, width=40, height=40, fg_color="#333").grid(row=1, column=6, padx=(5, 10), pady=(0, 15), sticky="w")
+
+        # --- Botões de Ação ---
+        fr_botoes_acao = ctk.CTkFrame(parent, fg_color="transparent")
+        fr_botoes_acao.grid(row=4, column=0, sticky="ew", padx=30, pady=(5, 15))
+
+        ctk.CTkButton(fr_botoes_acao, text="💾 SALVAR PRODUTO", command=self.add_produto, fg_color=COR_SUCCESS, text_color="#003300", font=FONT_BOLD, height=45).pack(side="left", padx=(0, 10))
+        ctk.CTkButton(fr_botoes_acao, text="🧹 LIMPAR", command=self.limpar_campos, fg_color="#2B2B2B", text_color="white", height=45, width=100).pack(side="left", padx=5)
+        ctk.CTkButton(fr_botoes_acao, text="🗑️ REMOVER", command=self.del_produto, fg_color="transparent", border_width=1, border_color=COR_DANGER, text_color=COR_DANGER, height=45, width=100).pack(side="left", padx=5)
+        
+        ctk.CTkButton(fr_botoes_acao, text="🛒 GERAR LISTA DE COMPRAS", command=self.gerar_lista_compras, fg_color="#E91E63", hover_color="#C2185B", font=FONT_BOLD, height=45, width=220).pack(side="right")
 
         # --- 4. Tabela (Treeview) ---
         fr_tabela_container = ctk.CTkFrame(parent, fg_color="transparent")
-        fr_tabela_container.grid(row=3, column=0, sticky="nsew", padx=30, pady=12)
+        fr_tabela_container.grid(row=5, column=0, sticky="nsew", padx=30, pady=12)
 
-        colunas = ["PRODUTO", "NIVEL", "STATUS", "PRECO", "FORNECEDOR"]
+        colunas = ["PRODUTO", "CATEGORIA", "NIVEL", "STATUS", "PRECO", "FORNECEDOR"]
 
         style = ttk.Style()
         style.configure("Treeview", rowheight=32, font=("Arial", 11))
@@ -2152,16 +2225,18 @@ class PainelUltra(ctk.CTk):
         self.tree_estoque = ttk.Treeview(fr_tabela_container, columns=colunas, show="headings", style="Treeview", selectmode="browse")
 
         self.tree_estoque.heading("PRODUTO", text="PRODUTO", anchor="w")
+        self.tree_estoque.heading("CATEGORIA", text="CATEGORIA", anchor="w")
         self.tree_estoque.heading("NIVEL", text="NÍVEL VISUAL", anchor="w")
         self.tree_estoque.heading("STATUS", text="QTD / STATUS", anchor="center")
         self.tree_estoque.heading("PRECO", text="PREÇO", anchor="e")
         self.tree_estoque.heading("FORNECEDOR", text="FORNECEDOR", anchor="w")
 
-        self.tree_estoque.column("PRODUTO", width=320, minwidth=220)
+        self.tree_estoque.column("PRODUTO", width=250, minwidth=200)
+        self.tree_estoque.column("CATEGORIA", width=150, minwidth=120)
         self.tree_estoque.column("NIVEL", width=110, minwidth=110)
         self.tree_estoque.column("STATUS", width=130, anchor="center")
         self.tree_estoque.column("PRECO", width=110, anchor="e")
-        self.tree_estoque.column("FORNECEDOR", width=170, anchor="w")
+        self.tree_estoque.column("FORNECEDOR", width=150, anchor="w")
 
         sc_y = ctk.CTkScrollbar(fr_tabela_container, command=self.tree_estoque.yview, fg_color="transparent", button_color=COR_BORDA)
         self.tree_estoque.configure(yscroll=sc_y.set)
@@ -2170,6 +2245,7 @@ class PainelUltra(ctk.CTk):
         sc_y.pack(side="right", fill="y")
 
         self.tree_estoque.bind("<<TreeviewSelect>>", self.ao_selecionar_item)
+
     # ================= LÓGICA DE DADOS =================
 
     def carregar_estoque(self):
@@ -2185,11 +2261,24 @@ class PainelUltra(ctk.CTk):
                             lista_convertida.append({
                                 "nome": nome,
                                 "estoque_fisico": qtd,
-                                "categoria": "GERAL",
+                                "categoria": "📦 OUTROS", # Correção de legado
                                 "preco_venda": 0.0,
                                 "fornecedor": "-"
                             })
                         return lista_convertida
+                    
+                    # --- NOVO: TRAVA DE SEGURANÇA DE CATEGORIAS ---
+                    # Garante que o JSON não injete categorias que não existem no painel
+                    if isinstance(dados, list):
+                        for item in dados:
+                            cat_atual = item.get("categoria", "")
+                            if cat_atual not in self.ESTOQUE_CATEGORIAS:
+                                nova_cat = self.identificar_categoria(item.get("nome", ""))
+                                # Se a regra ainda devolver algo inválido, joga para OUTROS
+                                if nova_cat not in self.ESTOQUE_CATEGORIAS:
+                                    nova_cat = "📦 OUTROS"
+                                item["categoria"] = nova_cat
+                    # ----------------------------------------------
                     return dados
             return []
         except (FileNotFoundError, json.JSONDecodeError):
@@ -2213,7 +2302,9 @@ class PainelUltra(ctk.CTk):
         self.ent_prod.delete(0, 'end')
         self.ent_preco.delete(0, 'end')
         self.ent_qtd.delete(0, 'end')
+        self.ent_qtd_minima.delete(0, 'end')
         self.combo_cat.set("Selecione a Categoria")
+        self.combo_fornecedor.set("Selecione o Fornecedor")
         if self.tree_estoque.selection():
             self.tree_estoque.selection_remove(self.tree_estoque.selection())
 
@@ -2246,18 +2337,35 @@ class PainelUltra(ctk.CTk):
             self.ent_qtd.delete(0, 'end')
             self.ent_qtd.insert(0, str(item_real.get("estoque_fisico", 0)))
 
+            self.ent_qtd_minima.delete(0, 'end')
+            self.ent_qtd_minima.insert(0, str(item_real.get("quantidade_minima", 0)))
+
             categoria = item_real.get("categoria") or self.identificar_categoria(item_real.get("nome", ""))
+            
+            # --- NOVO: TRAVA DO COMBOBOX ---
+            if categoria not in self.ESTOQUE_CATEGORIAS:
+                categoria = "📦 OUTROS"
+            # -------------------------------
+            
             self.combo_cat.set(categoria)
+
+            fornecedor = item_real.get("fornecedor", "-").title()
+            self.combo_fornecedor.set(fornecedor)
 
     def add_produto(self):
         """Adiciona ou Atualiza produto."""
         nome = self.ent_prod.get().strip().lower()
         qtd_str = self.ent_qtd.get().strip()
         preco_str = self.ent_preco.get().strip().replace(',', '.')
+        qtd_minima_str = self.ent_qtd_minima.get().strip()
         categoria_selecionada = self.combo_cat.get()
         
         if "Selecione" in categoria_selecionada:
             categoria = self.identificar_categoria(nome)
+            # --- NOVO: TRAVA AO SALVAR AUTOMÁTICO ---
+            if categoria not in self.ESTOQUE_CATEGORIAS:
+                categoria = "📦 OUTROS"
+            # ----------------------------------------
         else:
             categoria = categoria_selecionada
         
@@ -2265,6 +2373,7 @@ class PainelUltra(ctk.CTk):
             try:
                 qtd = float(qtd_str) if '.' in qtd_str else int(qtd_str)
                 preco = float(preco_str) if preco_str else 0.0
+                qtd_minima = float(qtd_minima_str) if '.' in qtd_minima_str else int(qtd_minima_str) if qtd_minima_str else 0
                 
                 # Verifica se já existe para atualizar
                 encontrado = False
@@ -2274,6 +2383,7 @@ class PainelUltra(ctk.CTk):
                         item["preco_venda"] = preco  # Atualiza Preço
                         item["nome"] = nome # Garante que o nome seja salvo em minúsculo
                         item["categoria"] = categoria # Atualiza a categoria
+                        item["quantidade_minima"] = qtd_minima # Atualiza a quantidade mínima
                         encontrado = True
                         break
                 
@@ -2283,7 +2393,8 @@ class PainelUltra(ctk.CTk):
                         "estoque_fisico": qtd,
                         "categoria": categoria,
                         "preco_venda": preco,
-                        "fornecedor": "Manual"
+                        "fornecedor": "Manual",
+                        "quantidade_minima": qtd_minima
                     })
 
                 self.salvar_estoque_disk()
@@ -2327,7 +2438,7 @@ class PainelUltra(ctk.CTk):
                 return categoria
         return "📦 OUTROS"
 
-    def atualizar_tabela_estoque(self, filtro=""):
+    def atualizar_tabela_estoque(self, filtro="", filtro_categoria="Todas as Categorias", filtro_fornecedor="Todos os Fornecedores"):
         # Limpa tabela visualmente
         for item in self.tree_estoque.get_children(): 
             self.tree_estoque.delete(item)
@@ -2356,21 +2467,32 @@ class PainelUltra(ctk.CTk):
         for item in self.estoque_data:
             nome_raw = item.get("nome", "Desconhecido")
             nome_norm = normalizar_estoque_nome(nome_raw)
-            # Filtro de Busca: exige todas as palavras do filtro no nome
+            
+            # Aplica filtro de busca (termo)
             if palavras_filtro and not all(p in nome_norm for p in palavras_filtro):
                 continue
             # Pula packs se necessário
             if any(t in nome_norm for t in termos_ignorar_norm):
                 continue
-            # Organiza
+            
             cat = item.get("categoria", self.identificar_categoria(nome_raw))
+            forn = item.get("fornecedor", "-").title()
+
+            # Aplica filtro de categoria
+            if filtro_categoria != "Todas as Categorias" and cat != filtro_categoria:
+                continue
+            
+            # Aplica filtro de fornecedor
+            if filtro_fornecedor != "Todos os Fornecedores" and forn != filtro_fornecedor:
+                continue
+
             if cat not in estoque_organizado: estoque_organizado[cat] = []
             estoque_organizado[cat].append(item)
 
         # Renderiza na Tabela
         for categoria in sorted(estoque_organizado.keys()):
             nome_cat = categoria.upper()
-            id_pai = self.tree_estoque.insert("", "end", values=[f"📂 {nome_cat}", "", "", "", ""], open=True, tags=("categoria",))
+            id_pai = self.tree_estoque.insert("", "end", values=[f"📂 {nome_cat}", "", "", "", "", ""], open=True, tags=("categoria",))
             
             # Produtos ordenados por nome
             for item in sorted(estoque_organizado[categoria], key=lambda x: x.get("nome", "")):
@@ -2380,7 +2502,7 @@ class PainelUltra(ctk.CTk):
                     preco = float(item.get("preco_venda", 0))
                 except: qtd = 0; preco = 0
 
-                forn = item.get("fornecedor", "-")
+                forn = item.get("fornecedor", "-").title()
 
                 # Regras de Status
                 if qtd <= 0: status = "🚨 CRÍTICO"; tag = "critico"; limite = 20
@@ -2392,7 +2514,7 @@ class PainelUltra(ctk.CTk):
                 preco_visual = f"R$ {preco:.2f}"
 
                 self.tree_estoque.insert(id_pai, "end", 
-                                       values=[f"   {nome}", barra, f"{qtd_visual} | {status}", preco_visual, forn], 
+                                       values=[f"   {nome}", cat, barra, f"{qtd_visual} | {status}", preco_visual, forn], 
                                        tags=(tag,))
 
         # Cores das Tags
@@ -2413,11 +2535,13 @@ class PainelUltra(ctk.CTk):
         compras = {}
         itens_criticos = 0
         
-        # Lógica simplificada de agrupamento
+        # Lógica de agrupamento com quantidade mínima configurável
         for item in self.estoque_data:
             try:
                 qtd = float(item.get("estoque_fisico", 0))
-                if qtd <= 3:
+                qtd_minima_item = float(item.get("quantidade_minima", 3)) # Pega a mínima ou usa 3 como padrão
+
+                if qtd <= qtd_minima_item:
                     nome_original = item.get("nome", "")
                     if nome_original.strip().lower() in ignore_list:
                         continue
@@ -2457,6 +2581,11 @@ class PainelUltra(ctk.CTk):
             else: messagebox.showinfo("Info", mensagem)
         except: pass
     # ==================================================================================
+    #  SEÇÃO 9: ABA CONFIG
+    # ==================================================================================
+    # Responsável por: Configurações do sistema como horários, limites,
+    # integração com APIs e preferências do usuário.
+    # ==================================================================================    # ==================================================================================
     #  SEÇÃO 9: ABA CONFIG
     # ==================================================================================
     # Responsável por: Configurações do sistema como horários, limites,
@@ -2503,7 +2632,10 @@ class PainelUltra(ctk.CTk):
         self.ent_site_url = ctk.CTkEntry(fr, placeholder_text="https://seu-site-ou-api")
         self.ent_site_url.pack(pady=5, fill='x', padx=40)
         self.ent_site_url.insert(0, self.config_data.get("site_url", ""))
-
+        ctk.CTkLabel(fr, text="🔵 Nome do Grupo WhatsApp", font=FONT_BOLD, text_color=COR_AMARELO).pack(pady=(15, 5))
+        self.ent_nome_grupo = ctk.CTkEntry(fr, placeholder_text="Nome do grupo WhatsApp")
+        self.ent_nome_grupo.pack(pady=5, fill='x', padx=40)
+        self.ent_nome_grupo.insert(0, self.config_data.get("nome_grupo", ""))
         ctk.CTkLabel(fr, text="🛒 Lista de Compras", font=FONT_BOLD, text_color=COR_AMARELO).pack(pady=(15, 5))
         
         self.ent_compras_ignore = ctk.CTkEntry(fr, placeholder_text="Itens a ignorar, separados por vírgula")
@@ -2576,6 +2708,7 @@ class PainelUltra(ctk.CTk):
             self.config_data["compras_ignore_list"] = self.ent_compras_ignore.get()
             self.config_data["alerta_retirada_auto"] = self.switch_alerta_auto.get()
             self.config_data["whatsapp_mencao_ativa"] = self.switch_mencao.get()
+            self.config_data["nome_grupo"] = self.ent_nome_grupo.get().strip()
             self.salvar_config()
             self.google_sheets_config = self._carregar_google_sheets_config()
             self._atualizar_status_alerta_auto()
@@ -3012,7 +3145,8 @@ class PainelUltra(ctk.CTk):
         if self._aba_atual != "logs":
             # Limita o buffer para não crescer infinitamente
             if len(self._log_buffer) > 500:
-                self._log_buffer = self._log_buffer[-500:]
+                # deque não suporta slice, então converte para list e volta para deque
+                self._log_buffer = deque(list(self._log_buffer)[-500:], maxlen=500)
             self.after(LOGS_REFRESH_IDLE_MS, self.atualizar_logs_interface)
             return
 
@@ -3048,7 +3182,7 @@ class PainelUltra(ctk.CTk):
 
     def carregar_config(self):
         if not os.path.exists(ARQUIVO_CONFIG):
-            return {"email": "", "senha": "", "motoboys": {}, "bairros": {}, "respostas_bot": {}}
+            return {"email": "", "senha": "", "motoboys": {}, "bairros": {}, "respostas_bot": {}, "fornecedores": {}}
         try:
             with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
                 config = json.load(f)
@@ -3589,6 +3723,43 @@ class PainelUltra(ctk.CTk):
     def salvar_bairros_disk(self):
         self.salvar_config()
         self.mostrar_toast("Zonas Salvas!", "success")
+
+    def _atualizar_combo_fornecedores(self, _=None):
+        fornecedores = sorted(list(self.config_data.get("fornecedores", {}).keys()))
+        if fornecedores:
+            self.combo_fornecedor.configure(values=["-"] + fornecedores)
+        else:
+            self.combo_fornecedor.configure(values=["-"])
+        if self.combo_fornecedor.get() == "Selecione o Fornecedor":
+            self.combo_fornecedor.set("-")
+
+    def add_fornecedor_dialog(self):
+        novo_fornecedor = simpledialog.askstring("Novo Fornecedor", "Digite o nome do novo fornecedor:")
+        if novo_fornecedor:
+            novo_fornecedor = novo_fornecedor.strip().title()
+            if novo_fornecedor:
+                self.config_data.setdefault("fornecedores", {})[novo_fornecedor] = True # Salva com um valor booleano simples
+                self.salvar_config()
+                self._atualizar_combo_fornecedores()
+                self.combo_fornecedor.set(novo_fornecedor)
+                self.mostrar_toast(f"Fornecedor '{novo_fornecedor}' adicionado!", "success")
+
+    def _atualizar_combo_fornecedores_filtro(self, _=None):
+        """Atualiza a lista de fornecedores no combobox de filtro"""
+        fornecedores_config = list(self.config_data.get("fornecedores", {}).keys())
+        fornecedores_estoque = list(set(item.get("fornecedor", "-") for item in self.estoque_data if item.get("fornecedor")))
+        todos = sorted(list(set(fornecedores_config + fornecedores_estoque)))
+        
+        if todos:
+            self.combo_filtro_fornecedor.configure(values=["Todos os Fornecedores"] + todos)
+        else:
+            self.combo_filtro_fornecedor.configure(values=["Todos os Fornecedores", "-"])
+
+    def _aplicar_filtros_estoque(self, _=None):
+        """Acionado quando muda categoria ou fornecedor nos filtros"""
+        cat = self.combo_filtro_categoria.get()
+        forn = self.combo_filtro_fornecedor.get()
+        self.atualizar_tabela_estoque(filtro=self.ent_busca.get(), filtro_categoria=cat, filtro_fornecedor=forn)
 
     def filtrar_tabela_busca(self, _):
         termo = self.ent_busca.get().lower()

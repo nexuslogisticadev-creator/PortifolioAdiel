@@ -1,3 +1,15 @@
+# ==================================================================================
+# INTEGRAÇÃO E SINCRONIA ENTRE SISTEMAS
+# ----------------------------------------------------------------------------------
+# Este arquivo implementa o ROBÔ principal (robo.py), que executa comandos recebidos
+# tanto do painel (painel.py) quanto do bot Telegram (telegram_bot.py).
+# Comandos do painel chegam via 'comando_imprimir.txt'.
+# Comandos do Telegram chegam via 'telegram_command.txt'.
+# O robô processa ambos, executando ações críticas e respondendo conforme necessário.
+# Toda lógica principal do robô é mantida intacta; a integração é feita por camadas.
+# Mantenha os comandos e respostas sincronizados entre todos os sistemas.
+# Consulte os comentários de integração ao longo do código para pontos de comunicação.
+# ==================================================================================
 import difflib
 import requests
 from curl_cffi import requests as cffi_requests
@@ -221,27 +233,98 @@ LIMITE_REQUISICOES_DIA = PROTECAO.get('limite_requisicoes_dia', 3000)
 REFRESH_INTERVAL_1 = PROTECAO.get('refresh_interval_1', 7200)
 REFRESH_INTERVAL_2 = PROTECAO.get('refresh_interval_2', 1200)
 CHROME_RESTART_COOLDOWN = PROTECAO.get('chrome_restart_cooldown', 300)
+
 # ================= TELEGRAM BOT (ADICIONADO) =================
-TELEGRAM_TOKEN = ""
-TELEGRAM_CHAT_ID = ""
+TELEGRAM_TOKEN = CONFIG.get('telegram_token', '')
+TELEGRAM_CHAT_ID = CONFIG.get('telegram_chat_id', '')
 LAST_UPDATE_ID = 0
+ARQUIVO_COMANDO_TELEGRAM = 'telegram_command.txt'
+
 def enviar_telegram(mensagem):
     """Envia mensagem para o Telegram usando o token carregado."""
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         return
-    
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        # Usamos cffi_requests pois já está importado
         payload = {
-            "chat_id": TELEGRAM_CHAT_ID, 
-            "text": mensagem, 
-            "parse_mode": "Markdown" 
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": mensagem,
+            "parse_mode": "Markdown"
         }
         cffi_requests.post(url, json=payload, timeout=20)
     except Exception as e:
         print(f"⚠️ Erro Telegram: {e}")
 
+import threading
+def telegram_polling():
+    global LAST_UPDATE_ID
+    if not TELEGRAM_TOKEN:
+        print("Telegram desativado (sem token)")
+        return
+    print("[Telegram] Polling iniciado e escutando comandos...")
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
+    while True:
+        try:
+            params = {"timeout": 30, "offset": LAST_UPDATE_ID + 1}
+            resp = cffi_requests.get(url, params=params, timeout=35)
+            data = resp.json()
+            if not data.get("ok"): continue
+            
+            for update in data.get("result", []):
+                LAST_UPDATE_ID = update["update_id"]
+                msg = update.get("message", {})
+                text = msg.get("text", "")
+                chat_id = str(msg.get("chat", {}).get("id", ""))
+                
+                if chat_id != TELEGRAM_CHAT_ID: continue
+                
+                # Mantém o texto original para não estragar maiúsculas/minúsculas dos nomes
+                cmd_original = text.strip()
+                cmd = cmd_original.lower()
+                
+                if cmd in ["/status", "status"]:
+                    enviar_telegram("🤖 Robô ativo! Use /ajuda para comandos.")
+                elif cmd in ["/ajuda", "ajuda", "/help"]:
+                    enviar_telegram("Comandos disponíveis:\n/status - status\n/parar - parar robô\n/reiniciar - reiniciar robô\n/gerar_excel - gerar planilha\n/gerar_resumo - resumo do dia\n/atualizar_estoque - atualizar estoque\n\n🖨️ *Impressões:*\n`IMPRIMIR:nome_motoboy`\n`GERAR_GARANTIA:dados_com_barras_verticais`")
+                elif cmd in ["/parar", "parar"]:
+                    with open(ARQUIVO_COMANDO_TELEGRAM, 'w', encoding='utf-8') as f:
+                        f.write('PARAR')
+                    enviar_telegram("🛑 Parando robô...")
+                elif cmd in ["/reiniciar", "reiniciar"]:
+                    with open(ARQUIVO_COMANDO_TELEGRAM, 'w', encoding='utf-8') as f:
+                        f.write('REINICIAR')
+                    enviar_telegram("🔄 Reiniciando robô...")
+                elif cmd in ["/gerar_excel", "gerar_excel"]:
+                    with open(ARQUIVO_COMANDO_TELEGRAM, 'w', encoding='utf-8') as f:
+                        f.write('GERAR_EXCEL')
+                    enviar_telegram("⏳ Gerando Excel...")
+                elif cmd in ["/gerar_resumo", "gerar_resumo"]:
+                    with open(ARQUIVO_COMANDO_TELEGRAM, 'w', encoding='utf-8') as f:
+                        f.write('GERAR_RESUMO')
+                    enviar_telegram("⏳ Gerando resumo...")
+                elif cmd in ["/atualizar_estoque", "atualizar_estoque"]:
+                    with open(ARQUIVO_COMANDO_TELEGRAM, 'w', encoding='utf-8') as f:
+                        f.write('ATUALIZAR_ESTOQUE')
+                    enviar_telegram("⏳ Atualizando estoque...")
+                    
+                # --- NOVA ROTA PARA AS IMPRESSÕES E GARANTIAS ---
+                elif cmd_original.startswith("IMPRIMIR:") or cmd_original.startswith("IMPRIMIR_PEDIDO:") or cmd_original.startswith("GERAR_GARANTIA:") or cmd_original.startswith("IMPRIMIR_GARANTIA:"):
+                    with open(ARQUIVO_COMANDO_TELEGRAM, 'w', encoding='utf-8') as f:
+                        f.write(cmd_original) # Escreve o comando exatamente como o usuário mandou (com as letras maiúsculas/minúsculas corretas)
+                    # Não precisa enviar msg aqui, pois a função final já vai avisar se deu certo ou errado
+
+        except Exception as e:
+            print(f"[Telegram] Erro polling: {e}")
+            
+        # O sleep fica alinhado com o try/except, dentro do while
+        time.sleep(2)
+
+# ==================================================================================
+# Inicia polling do Telegram em thread separada (FORA DA FUNÇÃO, encostado na esquerda)
+# Certifique-se de que essa parte NÃO tem o símbolo "#" na frente do if e do threading
+# ==================================================================================
+#if TELEGRAM_TOKEN:
+    #threading.Thread(target=telegram_polling, daemon=True).start()
 # ==================================================================================
 #  SEÇÃO 3: TELEGRAM BOT - INICIALIZAÇÃO
 # ==================================================================================
@@ -301,9 +384,18 @@ def _resumir_payload(payload):
 # proteção contra detecção (User-Agent, delays aleatórios, tratamento de erros).
 # ==================================================================================
 
-def requisicao_segura(payload):
+def requisicao_segura(payload, ignorar_limite=False):
     global TOKEN_ATUAL, REQUISICOES_HOJE, DATA_ULTIMO_RESET, ERROS_CONSECUTIVOS
     
+    # Cria a variável de pausa inteligente se ela não existir
+    global PAUSA_LIMITE_ATE
+    if 'PAUSA_LIMITE_ATE' not in globals():
+        PAUSA_LIMITE_ATE = 0
+        
+    # Se o robô está em pausa obrigatória e a requisição NÃO tem Passe VIP, ignora silenciosamente
+    if time.time() < PAUSA_LIMITE_ATE and not ignorar_limite:
+        return None
+
     # 1. RESET CONTADOR DIÁRIO
     hoje = datetime.now().date()
     if hoje != DATA_ULTIMO_RESET:
@@ -312,26 +404,27 @@ def requisicao_segura(payload):
         print(f"\n🔄 Contador de requisições resetado ({hoje})")
     
     # 2. VERIFICAR LIMITE DIÁRIO
-    if REQUISICOES_HOJE >= LIMITE_REQUISICOES_DIA:
+    if REQUISICOES_HOJE >= LIMITE_REQUISICOES_DIA and not ignorar_limite:
         print(f"\n⚠️ LIMITE DIÁRIO ATINGIDO ({REQUISICOES_HOJE}/{LIMITE_REQUISICOES_DIA})")
-        print("⏸️ Pausando até meia-noite...")
-        time.sleep(300)  # 5 minutos
+        print("⏸️ Monitoramento pausado por 5 minutos (WhatsApp continua funcionando)...")
+        PAUSA_LIMITE_ATE = time.time() + 300  # Define pausa de 5 minutos sem travar o código
         return None
     
     # 3. PAUSA EM HORÁRIO SUSPEITO (Madrugada: 2h-6h)
     hora_atual = datetime.now().hour
-    if 2 <= hora_atual < 6:
+    if 2 <= hora_atual < 6 and not ignorar_limite:
         print(f"\n🌙 Horário suspeito ({hora_atual}h) - Pausando 30s...")
         time.sleep(30)
     
     # 4. BACKOFF EXPONENCIAL EM CASO DE ERROS
-    if ERROS_CONSECUTIVOS > 0:
+    if ERROS_CONSECUTIVOS > 0 and not ignorar_limite:
         backoff = min(2 ** ERROS_CONSECUTIVOS, 60)  # Max 60s
         print(f"⏳ Backoff: {backoff}s (erros: {ERROS_CONSECUTIVOS})")
         time.sleep(backoff)
     
-    # 5. DELAY ALEATÓRIO (comportamento humano)
-    esperar_humano(1, 3)
+    # 5. DELAY ALEATÓRIO (comportamento humano - ignorado se for urgente do zap)
+    if not ignorar_limite:
+        esperar_humano(1, 3)
     
     # 6. HEADERS COMPLETOS E REALISTAS
     headers_completos = CONFIG.get('headers_api', {})
@@ -392,8 +485,7 @@ def requisicao_segura(payload):
         print(f"   {detalhe}")
         print(f"   Operacao: {resumo}")
         enviar_telegram(f"Erro de rede em {resumo}. {detalhe}")
-        return None
-# ================= FUNÇÕES DE IMPRESSÃO TÉRMICA =================
+        return None# ================= FUNÇÕES DE IMPRESSÃO TÉRMICA =================
 CMD_INIT = b"\x1b\x40"
 CMD_CENTER = b"\x1b\x61\x01"
 CMD_LEFT = b"\x1b\x61\x00"
@@ -1633,11 +1725,23 @@ def iniciar_chrome_persistente():
             time.sleep(2)
         
         print("🔓 Token capturado com sucesso!")
-        driver.execute_script("window.open('https://web.whatsapp.com', '_blank');")
-        driver.switch_to.window(driver.window_handles[-1])
-        print("📱 Aguardando carregamento do WhatsApp...")
-        WebDriverWait(driver, 300).until(EC.presence_of_element_located((By.XPATH, '//div[@contenteditable="true"]')))
         
+        # --- VERIFICAÇÃO INTELIGENTE DE ABAS ---
+        # Verifica se o Chrome já restaurou a aba do WhatsApp automaticamente
+        aba_whatsapp_encontrada = False
+        for handle in driver.window_handles:
+            driver.switch_to.window(handle)
+            if "whatsapp" in driver.current_url:
+                aba_whatsapp_encontrada = True
+                break
+                
+        # Se não achou nenhuma aba do WhatsApp, abre uma nova
+        if not aba_whatsapp_encontrada:
+            driver.execute_script("window.open('https://web.whatsapp.com', '_blank');")
+            driver.switch_to.window(driver.window_handles[-1])
+        # ---------------------------------------
+        
+        print("📱 Aguardando carregamento do WhatsApp...")
         print(f"🔒 Bloqueando no grupo: {NOME_GRUPO_FIXO}")
         garantir_foco_no_grupo() 
         print("✅ Sistemas OK!")
@@ -1657,7 +1761,7 @@ def enviar_mensagem_grupo(mensagem):
             box = caixas[-1]
             driver.execute_script("arguments[0].focus();", box)
             
-            # VERIFICA SE A MENSAGEM COME�A COM MENÇÃO
+            # VERIFICA SE A MENSAGEM COME A COM MENÇÃO
             mencao_prefixo = "@+55 49 9172-7951 "
             tem_mencao = mensagem.startswith(mencao_prefixo)
             
@@ -1734,12 +1838,42 @@ def traduzir_status(status_raw):
 def buscar_telefone(num):
     try:
         p = {"operationName": "sellerGetCustomerPhoneNumber", "query": "mutation sellerGetCustomerPhoneNumber($orderNumber: String!, $contactReason: OrderContactReasonInput!) { getCustomerPhoneNumber(orderNumber: $orderNumber, contactReason: $contactReason) { phoneNumber } }", "variables": {"orderNumber": str(num), "contactReason": {"category": "REASON_CATEGORY_CHANGE_ORDER", "description": "Validar", "item": "REASON_ITEM_PRODUCT_MISSING"}}}
-        r = requisicao_segura(p)
+        
+        # --- VIP PASS AQUI ---
+        r = requisicao_segura(p, ignorar_limite=True) 
+        
         if r and r.status_code == 200:
             return r.json()["data"]["getCustomerPhoneNumber"]["phoneNumber"].replace("+", "")
     except: return "Não disp."
     return "Não disp."
 
+# === NOVA FUNÇÃO: CONSULTA DIRETA NA API (ACTIVE ORDERS) ===
+def consultar_api_direta():
+    # Query ajustada para pegar exatamente os dados do seu JSON
+    q = """query sellerActiveOrders { 
+        activeOrders { 
+            number 
+            date
+            status 
+            customer { name } 
+            items { name amount } 
+            delivery { 
+                courier { email }
+                address { neighborhood }
+            } 
+        } 
+    }"""
+    try:
+        # --- VIP PASS AQUI TAMBÉM ---
+        r = requisicao_segura({"query": q}, ignorar_limite=True)
+        
+        if r and r.status_code == 200:
+            d = r.json()
+            if "data" in d and "activeOrders" in d["data"]:
+                return d["data"]["activeOrders"]
+    except Exception as e:
+        print(f"Erro ao consultar API direta: {e}")
+    return []
 # === NOVA FUNÇÃO: BUSCAR TODOS NO EXCEL (MANTIDA) ===
 def buscar_todos_pedidos_excel_por_nome(nome_buscado):
     encontrados = []
@@ -2546,11 +2680,36 @@ def processar_comando_telegram():
 
         print(f"🤖 Recebido comando do Telegram: {cmd}")
 
-        if cmd == 'GERAR_EXCEL':
+
+        if cmd == 'PARAR':
+            enviar_telegram("🛑 Robô será parado por comando do Telegram.")
+            print("[Telegram] Comando PARAR recebido. Encerrando...")
+            os._exit(0)
+
+        elif cmd == 'REINICIAR':
+            enviar_telegram("🔄 Reiniciando o robô por comando do Telegram...")
+            print("[Telegram] Comando REINICIAR recebido. Reiniciando...")
+            os.execv(sys.executable, ['python'] + sys.argv)
+
+
+        # INTEGRAÇÃO: Aqui são processados todos os comandos recebidos do Telegram (telegram_command.txt)
+        # e do painel (comando_imprimir.txt). Mantenha este bloco sincronizado com os comandos disponíveis
+        # em telegram_bot.py e painel.py para garantir operação remota consistente.
+        if cmd == 'PARAR':
+            enviar_telegram("🛑 Robô será parado por comando do Telegram.")
+            print("[Telegram] Comando PARAR recebido. Encerrando...")
+            os._exit(0)
+
+        elif cmd == 'REINICIAR':
+            enviar_telegram("🔄 Reiniciando o robô por comando do Telegram...")
+            print("[Telegram] Comando REINICIAR recebido. Reiniciando...")
+            os.execv(sys.executable, ['python'] + sys.argv)
+
+        elif cmd == 'GERAR_EXCEL':
             enviar_telegram("📜 Ok, buscando o histórico completo do dia para gerar o Excel. Isso pode levar um momento...")
             buscar_historico_do_dia(limite_paginas=None)
             enviar_telegram("✅ Histórico verificado e Excel atualizado.")
-        
+
         elif cmd == 'GERAR_RESUMO':
             enviar_telegram("📊 *Gerando resumo detalhado, aguarde...*")
             msg_resumo = gerar_relatorio_executivo()
@@ -2558,14 +2717,118 @@ def processar_comando_telegram():
 
         elif cmd == 'GERAR_CANCELADAS':
             enviar_telegram("🖨️ *Gerando Relatório de Canceladas...*")
-            # A função original imprime, vamos adaptar para enviar texto
             res = processar_relatorio_canceladas()
             enviar_telegram(f"✅ {res}")
+
 
         elif cmd == 'ATUALIZAR_ESTOQUE':
             enviar_telegram("📦 Ok, iniciando a atualização do estoque com base nos pedidos do dia...")
             atualizar_estoque_por_historico()
             enviar_telegram("✅ Estoque atualizado.")
+
+        elif cmd == 'VER_MOTOS':
+            enviar_telegram("🔎 *Verificando entregadores na rua...*")
+            try:
+                pedidos = consultar_api_direta()
+                status_rota = ['DISPATCHED', 'IN_TRANSIT', 'EN_ROUTE', 'EM_ROUTE', 'DM_EN_ROUTE', 'DM_PICKED_UP', 'PICKED_UP', 'OUT_FOR_DELIVERY', 'ON_THE_WAY', 'IN_DELIVERY', 'DM_ROUTING']
+                
+                motos_na_rua = {}
+                for p in pedidos:
+                    st = str(p.get('status', '')).upper()
+                    if st in status_rota:
+                        pid = str(p['number'])
+                        try: email = p['delivery']['courier']['email']
+                        except: email = None
+                        
+                        nome_moto = identificar_motoboy(email) if email else "Desconhecido"
+                        
+                        # Agrupa os pedidos por motoboy
+                        if nome_moto not in motos_na_rua:
+                            motos_na_rua[nome_moto] = []
+                        motos_na_rua[nome_moto].append(pid)
+                
+                if not motos_na_rua:
+                    enviar_telegram("🛵 *Nenhum motoboy na rua neste momento.*")
+                else:
+                    msg = "🛵 *MOTOBOYS EM ROTA:*\n\n"
+                    for moto, pids in motos_na_rua.items():
+                        msg += f"👤 *{moto.upper()}* - {len(pids)} entrega(s)\n"
+                        msg += f"📦 Pedidos: {', '.join(pids)}\n\n"
+                    enviar_telegram(msg)
+            except Exception as e:
+                enviar_telegram(f"❌ Erro ao buscar motoboys na rua: {e}")
+
+        elif cmd == 'VER_ESTOQUE':
+            estoque = carregar_estoque_seguro()
+            if estoque:
+                if isinstance(estoque, list):
+                    itens = [f"{p.get('nome','')}: {p.get('estoque_fisico',0)}" for p in estoque]
+                elif isinstance(estoque, dict):
+                    itens = [f"{k}: {v}" for k, v in estoque.items()]
+                else:
+                    itens = []
+                enviar_telegram("Estoque atual:\n" + "\n".join(itens[:30]))
+            else:
+                enviar_telegram("Não foi possível carregar o estoque.")
+
+        elif cmd == 'RECARREGAR_CONFIG':
+            carregar_credenciais()
+            carregar_motoboys_do_painel()
+            enviar_telegram("🔄 Configurações recarregadas.")
+
+        elif cmd.startswith('ENVIAR_MENSAGEM:'):
+            mensagem = cmd.split(':', 1)[1]
+            enviar_mensagem_grupo(mensagem)
+            enviar_telegram("Mensagem enviada ao grupo WhatsApp.")
+
+        elif cmd.startswith('IMPRIMIR_PEDIDO:'):
+            nome = cmd.split(':', 1)[1]
+            res = processar_impressao_individual(nome)
+            enviar_telegram(res)
+
+        # --- NOVO BLOCO: ENSINANDO O TELEGRAM A IMPRIMIR O FECHAMENTO ---
+        elif cmd.startswith('IMPRIMIR:'):
+            dados_brutos = cmd.split(':', 1)[1]
+            
+            # Separa o nome e a data cortando no "|"
+            if "|" in dados_brutos:
+                nome_alvo, data_str = dados_brutos.split("|")
+            else:
+                nome_alvo = dados_brutos
+                data_str = datetime.now().strftime('%d-%m-%Y')
+            
+            enviar_telegram(f"🖨️ *Buscando fechamento...*\nMotoboy: {nome_alvo.upper()}\nData: {data_str}")
+            
+            # Chama a SUA função original que já faz todo o cálculo e impressão do Excel
+            sucesso = imprimir_extrato_por_nome(nome_alvo, data_str)
+            
+            if sucesso:
+                enviar_telegram(f"✅ Extrato impresso na impressora térmica com sucesso!")
+            else:
+                enviar_telegram(f"⚠️ *Nenhum pedido encontrado*\nNão achei corridas para '{nome_alvo}' na planilha do dia {data_str}.")
+        
+        # --- BLOCO CORRIGIDO: IMPRESSÃO DE GARANTIA ---
+        elif cmd.startswith('GERAR_GARANTIA:') or cmd.startswith('IMPRIMIR_GARANTIA:'):
+            dados = cmd.split(':', 1)[1]
+            partes = dados.split('|')
+            
+            if len(partes) < 8:
+                enviar_telegram(f"❌ *Erro de formato na Garantia*\nFormato recebido não tem as 8 partes necessárias.\nRecebido: `{dados}`")
+                print("⚠️ Dados de garantia incompletos recebidos do Telegram.")
+            else:
+                enviar_telegram(f"🖨️ *Imprimindo Recibo de Garantia...*\nMotoboy: {partes[0].upper()}")
+                imprimir_recibo_garantia(dados)
+                enviar_telegram("✅ Recibo de garantia impresso com sucesso!")
+
+        elif cmd == 'TOGGLE_ALERTA_AUTO':
+            novo = not CONFIG.get('alerta_retirada_auto', False)
+            atualizar_config_flag('alerta_retirada_auto', novo)
+            enviar_telegram(f"Alerta automática {'ativada' if novo else 'desativada'}.")
+
+        elif cmd == 'TOGGLE_MENCAO':
+            novo = not CONFIG.get('whatsapp_mencao_ativa', False)
+            atualizar_config_flag('whatsapp_mencao_ativa', novo)
+            enviar_telegram(f"Menção automática {'ativada' if novo else 'desativada'}.")
 
     except Exception as e:
         print(f"❌ Erro ao processar comando do Telegram: {e}")
