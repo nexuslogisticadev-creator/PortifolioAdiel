@@ -1,0 +1,88 @@
+🛒 LISTA DE REPOSIÇÃO -  DELIVERY
+📅 15/03/2026
+
+🏢 TAF
+------------------------------
+[ ] 51 Ice Balada 275Ml            (Est.: 1.0)
+[ ] 51 Ice Maracujá 275Ml          (Est.: 0.0)
+[ ] Vinho Branco Sauvignon Blanc Pedro Jimenez Reservado Concha Y Toro 750Ml (Est.: 2.0)
+[ ] Vinho Branco Verde Casal Garcia 750Ml (Est.: 0.0)
+
+🏢 ZÉ DELIVERY
+------------------------------
+[ ] 8 Unidades De Corona Cero 330Ml + 1 Sacooler (Est.: 0.0)
+
+🏢 ACB
+------------------------------
+[ ] Antarctica Pilsen 350Ml        (Est.: 0.0)
+[ ] Beats Red Mix 269Ml            (Est.: 0.0)
+[ ] Brahma 300Ml                   (Est.: 0.0)
+[ ] Brahma 350Ml                   (Est.: 0.0)
+[ ] Brahma Duplo Malte 300Ml       (Est.: 2.0)
+[ ] Budweiser Zero 350Ml           (Est.: 0.0)
+[ ] Gatorade Laranja 500Ml         (Est.: 0.0)
+[ ] Michelob Ultra Light Lager 330Ml (Est.: 0.0)
+[ ] Original 350Ml                 (Est.: 0.0)
+[ ] Pepsi 600Ml                    (Est.: 3.0)
+[ ] Red Bull Energy Drink 355Ml    (Est.: 0.0)
+[ ] Stella Artois 350Ml            (Est.: 0.0)
+[ ] Stella Pure Gold 330Ml         (Est.: 0.0)
+[ ] Tônica Antarctica Zero 350Ml   (Est.: 3.0)
+[ ] Trident Morango 8G             (Est.: 1.0)
+
+🏢 TELE BIER EFAPI
+------------------------------
+[ ] Bis Branco 100,8G              (Est.: 3.0)
+[ ] Bis Xtra Oreo 45G              (Est.: 3.0)
+[ ] Chocolate Bis Black Lacta 100G (Est.: 1.0)
+[ ] Chocolate Bis Lacta Oreo 100G  (Est.: 0.0)
+[ ] Chocolate Branco Kit Kat 41,5G (Est.: 0.0)
+[ ] Chocolate Lacta Amaro 40% Cacau 80G (Est.: 3.0)
+[ ] Chocolate Lacta Oreo 90G       (Est.: 0.0)
+[ ] Chocolate Lacta Shot 80G       (Est.: 0.0)
+[ ] Mentos Fruit 37,5G             (Est.: 0.0)
+[ ] Pringles Sour Cream & Onion 109G (Est.: 2.0)
+
+🏢 PEPSICO
+------------------------------
+[ ] Cebolitos 91G                  (Est.: 3.0)
+[ ] Doritos Queijo Nacho 300G      (Est.: 0.0)
+[ ] Fandangos Presunto 105G        (Est.: 0.0)
+
+🏢 DISTRIBUIDORA BERTOTTI
+------------------------------
+[ ] Coquetel Alcoólico Mansão Maromba Gin Melancia + Combo Pet 1L (Est.: 0.0)
+[ ] Coquetel Alcoólico Mansão Maromba Whisky + Combo Double Darkness 1L (Est.: 0.0)
+
+🏢 TOZZO ALIMENTOS LTDA
+------------------------------
+[ ] Energético Baly Tropical Sem Açúcar 473Ml (Est.: 0.0)
+
+🏢 GELO POP
+------------------------------
+[ ] Gelo Saborizado Sal E Limão Coco Leve 190G (Est.: 0.0)
+[ ] Saco De Gelo Em Cubos - 3Kg    (Est.: 0.0)
+
+🏢 -
+------------------------------
+[ ] Gin Beefeater London Dry 750Ml (Est.: 1.0)
+
+🏢 DEQUECH
+------------------------------
+[ ] Gin Rocks Strawberry 1L        (Est.: 0.0)
+[ ] Gin Sunset Rocks Garrafa Vidro 1L (Est.: 2.0)
+[ ] Gin Tanqueray Rangpur 700Ml    (Est.: 1.0)
+[ ] Gin Tanqueray Sevilla 700Ml    (Est.: 1.0)
+
+🏢 DQUECH
+------------------------------
+[ ] Licor 43 700Ml                 (Est.: 2.0)
+[ ] Vodka Ciroc 750Ml              (Est.: 2.0)
+[ ] Vodka Ciroc Red Berry 750Ml    (Est.: 1.0)
+[ ] Vodka Grey Goose 750Ml         (Est.: 1.0)
+[ ] Vodka Smirnoff 998Ml           (Est.: 0.0)
+[ ] Whisky Chivas Regal 12 Anos 750Ml (Est.: 0.0)
+[ ] Whisky Jack Daniels 375Ml      (Est.: 1.0)
+[ ] Whisky Jim Beam Apple 1L       (Est.: 0.0)
+[ ] Whisky Johnnie Walker Black Label 1L (Est.: 2.0)
+
