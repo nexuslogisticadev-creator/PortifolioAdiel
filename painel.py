@@ -1,3 +1,7 @@
+import warnings
+warnings.filterwarnings("ignore", message="urllib3", category=Warning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 # ==================================================================================
 # INTEGRAÇÃO E SINCRONIA ENTRE SISTEMAS
 # ----------------------------------------------------------------------------------
@@ -26,6 +30,43 @@ import time
 import shutil
 import ctypes
 from ctypes import wintypes
+import logging
+import traceback
+
+# ==================================================================================
+# ⚡ SISTEMA DE LOGGING COMPLETO (Compatible com PyInstaller)
+# ==================================================================================
+# Configurar logging para arquivo e console
+# Funciona tanto com .py quanto com .exe gerado por PyInstaller
+
+def _get_log_path():
+    """Retorna o caminho do log, compatível com PyInstaller"""
+    if getattr(sys, 'frozen', False):
+        # Executável gerado por PyInstaller
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # Script Python normal
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, "painel_debug.log")
+
+LOG_PATH = _get_log_path()
+
+try:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - [%(funcName)s:%(lineno)d] - %(message)s',
+        handlers=[
+            logging.FileHandler(LOG_PATH, encoding='utf-8'),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+    logger = logging.getLogger(__name__)
+    logger.info("="*80)
+    logger.info(f"PAINEL INICIANDO - Log salvando em: {LOG_PATH}")
+    logger.info("="*80)
+except Exception as e:
+    print(f"❌ Erro ao configurar logging: {e}")
+    logger = logging.getLogger(__name__)
 
 # ==================================================================================
 #  SEÇÃO 1: IMPORTS E CONFIGURAÇÃO GLOBAL
@@ -45,7 +86,8 @@ except ImportError:
 
 # --- BIBLIOTECAS DE JANELA ---
 try:
-    import ctypes
+    import win32gui
+    import win32con
 except ImportError:
     pass
 
@@ -100,19 +142,16 @@ ARQUIVO_COMANDO = 'comando_imprimir.txt'
 # O robô lê e processa comandos deste arquivo (ver processar_comando_painel em robo.py).
 # Mantenha os comandos sincronizados entre painel.py, robo.py e telegram_bot.py.
 ARQUIVO_CONFIG = 'config.json'
-ARQUIVO_ESTOQUE = 'estoque.json'
-ARQUIVO_ALERTAS = 'alertas_atraso.json'
 ARQUIVO_FECHAMENTO_STATUS = 'fechamento_status.json'
 ARQUIVO_MEMORIA_FECH = 'memoria_fechamento.json'
-ARQUIVO_FORNECEDORES = 'fornecedores.json'
 
 # ================= PERFORMANCE SETTINGS =================
-AUTO_REFRESH_MS = 10000  # 30s - Auto-refresh do Excel
-UI_QUEUE_INTERVAL_MS = 200  # Processamento de fila UI
+AUTO_REFRESH_MS = 15000  # 15s - Auto-refresh do Excel
+UI_QUEUE_INTERVAL_MS = 150  # Processamento de fila UI
 UI_QUEUE_IDLE_MS = 500  # Economia de CPU quando idle
-LOGS_REFRESH_ACTIVE_MS = 1000  # 1s - Logs só quando necessário
-LOGS_REFRESH_IDLE_MS = 3000  # 3s - Economia máxima
-ALERTAS_REFRESH_MS = 15000  # 15s - Verificação de alertas
+LOGS_REFRESH_ACTIVE_MS = 250  # 250ms - Atualização de logs quando aba ativa
+LOGS_REFRESH_IDLE_MS = 1000  # 1s - Economia quando aba inativa
+ALERTAS_REFRESH_MS = 20000  # 20s - Verificação de alertas
 MAX_ROWS_DISPLAY = 300  # Limite de linhas na tabela (performance)
 
 # ================= FUNÇÕES AUXILIARES =================
@@ -214,9 +253,6 @@ class JanelaEdicao(ctk.CTkToplevel):
 # SEÇÃO 4: ABA MONITOR/VALES (linhas ~1297-1600)
 #   setup_aba_monitor, setup_aba_vales, carregar_tabela_vales, adicionar/editar/excluir_vale
 #
-# SEÇÃO 5: ABA ESTOQUE (linhas ~1584-1890)
-#   setup_aba_estoque, carregar_estoque, add/del_produto, gerar_lista_compras
-#
 # SEÇÃO 6: ABA BI & CONFIGURAÇÃO (linhas ~1893-2040)
 #   setup_aba_bi, atualizar_graficos_bi, gerar_mapa_calor, setup_aba_config
 #
@@ -238,44 +274,37 @@ class JanelaEdicao(ctk.CTkToplevel):
 #
 
 
-class PainelUltra(ctk.CTk):
-    def importar_estoque_do_excel(self, caminho_excel):
-        """
-        Importa o estoque do arquivo Excel de inventário e atualiza o estoque.json.
-        Espera que o nome do produto esteja na coluna 'Produto' e o estoque conferido em 'Estoque Conferido'.
-        """
+# ==================================================================================
+# ⚡ DECORATOR PARA LOGGING AUTOMÁTICO
+# ==================================================================================
+def log_method(func):
+    """Decorator que registra entrada, saída e erros de métodos"""
+    def wrapper(*args, **kwargs):
+        method_name = func.__name__
         try:
-            import openpyxl
-            wb = openpyxl.load_workbook(caminho_excel, data_only=True)
-            ws = wb.active
-            headers = [cell.value for cell in ws[1]]
-            col_produto = headers.index("Produto")
-            col_estoque = headers.index("Estoque Conferido")
-            novos_estoques = []
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                nome = str(row[col_produto]).strip() if row[col_produto] else None
-                estoque = row[col_estoque]
-                if nome and estoque is not None and str(estoque).replace('-', '').replace('.', '').isdigit():
-                    try:
-                        estoque_fisico = float(estoque)
-                    except:
-                        estoque_fisico = 0
-                    novos_estoques.append({"nome": nome, "estoque_fisico": estoque_fisico})
-            # Atualiza estoque.json
-            with open("estoque.json", "w", encoding="utf-8") as f:
-                json.dump(novos_estoques, f, ensure_ascii=False, indent=2)
-            self.mostrar_toast(f"Estoque atualizado com {len(novos_estoques)} itens do Excel!", "success")
+            logger.debug(f"[INÍCIO] {method_name} | args={len(args)-1}, kwargs={list(kwargs.keys())}")
+            result = func(*args, **kwargs)
+            logger.debug(f"[SUCESSO] {method_name}")
+            return result
         except Exception as e:
-            self.mostrar_toast(f"Erro ao importar estoque: {e}", "danger")
+            logger.error(f"[ERRO] {method_name}")
+            logger.error(f"Exception: {type(e).__name__}: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
+            raise
+    return wrapper
+
+class PainelUltra(ctk.CTk):
 
     def __init__(self):
+        logger.info("🚀 [__init__] Inicializando PainelUltra...")
         super().__init__()
-        self.ESTOQUE_CATEGORIAS = [
-            "🍺 CERVEJAS", "🍸 DESTILADOS", "🥤 NÃO ALCOÓLICOS", 
-            "⚡ ENERGÉTICOS", "🍷 VINHOS & ICES", "🍟 MERCEARIA & DIVERSOS", "📦 OUTROS"
-        ]
+        logger.info(f"📁 Diretório de execução: {os.getcwd()}")
+        logger.info(f"📝 Logs salvando em: {LOG_PATH}")
+        
         self.title("Control BOT | CONTROL CENTER V8.0 PRO")
         self.configure(fg_color=COR_BG_APP)
+        logger.debug("✅ Janela criada e configurada")
+        
         # Restaura ícone do Python na barra de título/taskbar
         try:
             import sys
@@ -346,7 +375,6 @@ class PainelUltra(ctk.CTk):
         self._ui_queue = queue.Queue()
         self.robo_rodando = False
         self.config_data = self.carregar_config()
-        self.estoque_data = self.carregar_estoque()
         self.bairros_conhecidos = set()
         self.atualizar_cache_bairros()
         self.google_sheets_config = self._carregar_google_sheets_config()
@@ -386,6 +414,7 @@ class PainelUltra(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
 
         # Deferir construção pesada da UI para agilizar o aparecimento da janela
+        logger.info("✅ [__init__] Inicialização concluída. Agendando construção da UI...")
         self.after(10, self._deferred_build)
 
     def _deferred_build(self):
@@ -393,12 +422,17 @@ class PainelUltra(ctk.CTk):
         Executado via `after` para permitir que a janela apareça imediatamente.
         """
         try:
+            logger.info("🔨 [_deferred_build] Iniciando construção da interface...")
             self.criar_menu_lateral()
+            logger.info("✅ Menu lateral criado")
+            
             self.criar_area_principal()
+            logger.info("✅ Área principal criada")
 
             self.frame_toast = ctk.CTkFrame(self, height=50, corner_radius=25, fg_color=COR_AMARELO)
             self.lbl_toast = ctk.CTkLabel(self.frame_toast, text="", font=FONT_BOLD, text_color="black")
             self.lbl_toast.pack(padx=30, pady=12)
+            logger.info("✅ Toast configurado")
 
             # Inicialização de processos (posposta para após a UI estar visível)
             self.after(100, self.atualizar_logs_interface)
@@ -407,8 +441,10 @@ class PainelUltra(ctk.CTk):
             # post init que seleciona aba inicial
             self.after(150, self._post_init_load)
             self.after(AUTO_REFRESH_MS, self._auto_refresh_inteligente)
-        except Exception:
-            pass
+            logger.info("✅ [_deferred_build] Interface construída com sucesso!")
+        except Exception as e:
+            logger.error(f"❌ [_deferred_build] ERRO: {e}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
 
 
     # ═════════════════════════════════════════════════════════════════════════════
@@ -642,7 +678,6 @@ class PainelUltra(ctk.CTk):
         self.criar_botao_menu("📊  Dashboard", "monitor", 7)
         self.criar_botao_menu("💰  Fechamento", "fechamento", 8)
         self.criar_botao_menu("💸  Vales & Desc.", "vales", 9)
-        self.criar_botao_menu("📦  Estoque", "estoque", 10)
         self.criar_botao_menu("🛵  Equipe", "motos", 11)
         self.criar_botao_menu("📍  Zonas", "bairros", 12)
         self.criar_botao_menu("🔑  PIX", "pix", 13)
@@ -693,7 +728,7 @@ class PainelUltra(ctk.CTk):
 
         self.frames = {}
         # Cria apenas os contêineres das abas; conteúdo será carregado on-demand
-        tab_names = ["monitor", "vales", "fechamento", "estoque", "logs", "motos", "pix", "bairros", "config"]
+        tab_names = ["monitor", "vales", "fechamento", "logs", "motos", "pix", "bairros", "config"]
         for nome in tab_names:
             fr = ctk.CTkFrame(self.main_container, fg_color=COR_BG_APP)
             self.frames[nome] = fr
@@ -704,7 +739,6 @@ class PainelUltra(ctk.CTk):
             "vales": self.setup_aba_vales,
             "monitor": self.setup_aba_monitor,
             "fechamento": self.setup_aba_fechamento,
-            "estoque": self.setup_aba_estoque,
             "logs": self.setup_aba_logs,
             "motos": self.setup_aba_motos,
             "pix": self.setup_aba_pix,
@@ -781,22 +815,7 @@ class PainelUltra(ctk.CTk):
             combo_w = 160 if mode == "compact" else (190 if mode == "normal" else 220)
             self.combo_motos_ativos.configure(width=combo_w)
         
-        if hasattr(self, "ent_prod"):
-            prod_w = 200 if mode == "compact" else (230 if mode == "normal" else 260)
-            self.ent_prod.configure(width=prod_w)
-        
-        if hasattr(self, "ent_qtd"):
-            qtd_w = 75 if mode == "compact" else (85 if mode == "normal" else 95)
-            self.ent_qtd.configure(width=qtd_w)
-        
-        if hasattr(self, "ent_qtd_minima"):
-            qtd_minima_w = 90 if mode == "compact" else (100 if mode == "normal" else 110)
-            self.ent_qtd_minima.configure(width=qtd_minima_w)
 
-        if hasattr(self, "combo_fornecedor"):
-            forn_w = 180 if mode == "compact" else (210 if mode == "normal" else 240)
-            self.combo_fornecedor.configure(width=forn_w)
-        
         if hasattr(self, "combo_vale_moto"):
             vale_w = 180 if mode == "compact" else (210 if mode == "normal" else 240)
             try:
@@ -851,17 +870,6 @@ class PainelUltra(ctk.CTk):
             for col, w in zip(cols, widths):
                 self.tree_vales.column(col, width=w)
 
-        if hasattr(self, "tree_estoque"):
-            if mode == "compact":
-                widths = [180, 80, 80, 80, 90, 100]
-            elif mode == "normal":
-                widths = [220, 100, 90, 100, 110, 120]
-            else:
-                widths = [250, 120, 110, 130, 110, 150]
-            
-            cols = ["PRODUTO", "CATEGORIA", "NIVEL", "STATUS", "PRECO", "FORNECEDOR"]
-            for col, w in zip(cols, widths):
-                self.tree_estoque.column(col, width=w)
 
         if hasattr(self, "fr_vales_top") and hasattr(self, "fr_vales_left") and hasattr(self, "fr_vales_actions"):
             if mode == "compact":
@@ -1321,8 +1329,8 @@ class PainelUltra(ctk.CTk):
             t_ped = self._parse_hora(str(entrega.get("hora", "")))
             val = float(entrega.get("valor", 0.0) or 0.0)
 
-            if t_ped is not None and t_in <= t_ped <= t_out:
-                # Entrega dentro do período garantido
+            if t_ped is not None and t_ped <= t_out:
+                # Entrega ANTES ou DURANTE o período garantido
                 prod_dentro += val
                 if abs(val - 8.0) < 0.1:
                     qtd8_dentro += 1
@@ -1335,7 +1343,6 @@ class PainelUltra(ctk.CTk):
                     qtd8_fora += 1
                 elif abs(val - 11.0) < 0.1:
                     qtd11_fora += 1
-            # Entregas ANTES do horário inicial são ignoradas no cálculo
 
         gar_valor = self._parse_float(gar_txt)
         if gar_valor is None:
@@ -1777,12 +1784,6 @@ class PainelUltra(ctk.CTk):
         ).grid(row=0, column=0, sticky="ew", padx=8, pady=(6, 3))
 
         ctk.CTkButton(
-            self.fr_quick_actions, text="ESTOQUE", command=self.atualizar_estoque_manual,
-            fg_color=COR_CARD_BG, border_width=1, border_color=COR_BORDA,
-            text_color=COR_TEXT_SEC, height=30, hover_color="#333", font=("Segoe UI Bold", 12)
-        ).grid(row=1, column=0, sticky="ew", padx=8, pady=3)
-
-        ctk.CTkButton(
             self.fr_quick_actions, text="CANCELADAS", command=self.enviar_canceladas,
             fg_color="transparent", border_width=1, border_color=COR_DANGER,
             text_color=COR_DANGER, height=30, hover_color="#2b1111", font=("Segoe UI Bold", 12)
@@ -1880,8 +1881,7 @@ class PainelUltra(ctk.CTk):
         if not self._defer_startup:
             self.carregar_tabela()
         
-        # Carrega alertas pendentes ao iniciar
-        self.after(500, self.carregar_alertas_atraso)
+  
 
     def criar_card_stat(self, parent, titulo, valor, cor, col_idx):
         f = ctk.CTkFrame(parent, fg_color=COR_CARD_BG, corner_radius=12, border_width=1, border_color=COR_BORDA)
@@ -1934,11 +1934,6 @@ class PainelUltra(ctk.CTk):
     def setup_aba_vales(self, parent):
         parent.grid_columnconfigure(0, weight=1)
         parent.grid_rowconfigure(2, weight=1)
-
-        # ÁREA DE ALERTAS DE ATRASO (PENDÊNCIA)
-        self.fr_alertas_atraso = ctk.CTkScrollableFrame(parent, fg_color=COR_CARD_BG, corner_radius=8, border_width=1, border_color=COR_DANGER, height=0)
-        self.fr_alertas_atraso.grid(row=0, column=0, sticky="ew", pady=(10, 10), padx=20)
-        self.fr_alertas_atraso.grid_remove()  # Esconde inicialmente
 
         # Cabeçalho
         self.fr_vales_top = ctk.CTkFrame(parent, fg_color="transparent")
@@ -2118,472 +2113,6 @@ class PainelUltra(ctk.CTk):
             except Exception as e:
                 self.mostrar_toast(f"Erro ao editar: {e}", "error")
     
-    # ==================================================================================
-    #  SEÇÃO 7: ABA ESTOQUE
-    # ==================================================================================
-    # Responsável por: Controle de inventário, monitoramento de itens,
-    # alertas de estoque baixo e atualização de quantidades.
-    # ==================================================================================
-
-    class AbaEstoque(ctk.CTkFrame):
-        def __init__(self, parent):
-            super().__init__(parent)
-            self.estoque_data = []
-        
-            self.setup_aba_estoque(self)
-            self.estoque_data = self.carregar_estoque()
-            self.atualizar_tabela_estoque()
-
-    def setup_aba_estoque(self, parent):
-        # Configuração do Grid Principal da Aba
-        parent.grid_columnconfigure(0, weight=1)
-        parent.grid_rowconfigure(5, weight=1)
-
-        # --- 1. Título ---
-        ctk.CTkLabel(parent, text="CONTROLE DE ESTOQUE (AUTOMÁTICO)", font=FONT_TITLE, text_color=COR_AMARELO).grid(row=0, column=0, pady=(20, 10))
-
-        # --- 2. Área de Busca ---
-        fr_busca = ctk.CTkFrame(parent, fg_color="transparent")
-        fr_busca.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
-
-        self.ent_busca = ctk.CTkEntry(fr_busca, placeholder_text="🔍 Pesquisar produto...", height=38, fg_color=COR_CARD_BG, border_color=COR_BORDA)
-        self.ent_busca.pack(side="left", fill="x", expand=True, padx=(0, 12))
-        self.ent_busca.bind("<Return>", lambda _: self.comando_buscar())
-
-        ctk.CTkButton(fr_busca, text="BUSCAR", command=self.comando_buscar, width=110, height=38, fg_color=COR_CARD_BG, hover_color=COR_BORDA).pack(side="right")
-
-        # --- Filtros de Tabela ---
-        fr_filtros = ctk.CTkFrame(parent, fg_color="transparent")
-        fr_filtros.grid(row=2, column=0, sticky="ew", padx=30, pady=10)
-
-        ctk.CTkLabel(fr_filtros, text="Filtrar por: ", font=FONT_MAIN, text_color=COR_TEXT_SEC).pack(side="left", padx=(0, 10))
-
-        self.combo_filtro_categoria = ctk.CTkComboBox(fr_filtros, values=["Todas as Categorias"] + self.ESTOQUE_CATEGORIAS, width=200, height=38, state="readonly")
-        self.combo_filtro_categoria.set("Todas as Categorias")
-        self.combo_filtro_categoria.pack(side="left", padx=5)
-        self.combo_filtro_categoria.bind("<<ComboboxSelected>>", self._aplicar_filtros_estoque)
-
-        self.combo_filtro_fornecedor = ctk.CTkComboBox(fr_filtros, values=["Todos os Fornecedores", "-"], width=200, height=38, state="readonly")
-        self.combo_filtro_fornecedor.set("Todos os Fornecedores")
-        self.combo_filtro_fornecedor.pack(side="left", padx=5)
-        self.combo_filtro_fornecedor.bind("<<ComboboxSelected>>", self._aplicar_filtros_estoque)
-        self.combo_filtro_fornecedor.bind("<Button-1>", self._atualizar_combo_fornecedores_filtro) # Atualiza a lista ao clicar
-
-        # --- 3. Frame de Inputs (Adicionar/Editar) ---
-        fr_inputs = ctk.CTkFrame(parent, fg_color=COR_CARD_BG)
-        fr_inputs.grid(row=3, column=0, sticky="ew", padx=30, pady=12)
-        
-        # Grid para Labels e Entradas
-        for i in range(7): fr_inputs.grid_columnconfigure(i, weight=1)
-
-        # Coluna 0: Produto
-        ctk.CTkLabel(fr_inputs, text="PRODUTO", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=0, padx=10, pady=(10, 0), sticky="w")
-        self.ent_prod = ctk.CTkEntry(fr_inputs, placeholder_text="Ex: Heineken 330ml", height=40)
-        self.ent_prod.grid(row=1, column=0, padx=10, pady=(0, 15), sticky="ew")
-
-        # Coluna 1: Preço
-        ctk.CTkLabel(fr_inputs, text="PREÇO (R$)", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=1, padx=5, pady=(10, 0), sticky="w")
-        self.ent_preco = ctk.CTkEntry(fr_inputs, placeholder_text="0.00", height=40)
-        self.ent_preco.grid(row=1, column=1, padx=5, pady=(0, 15), sticky="ew")
-
-        # Coluna 2: Qtd Atual
-        ctk.CTkLabel(fr_inputs, text="ESTOQUE ATUAL", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=2, padx=5, pady=(10, 0), sticky="w")
-        self.ent_qtd = ctk.CTkEntry(fr_inputs, placeholder_text="0", height=40)
-        self.ent_qtd.grid(row=1, column=2, padx=5, pady=(0, 15), sticky="ew")
-
-        # Coluna 3: Qtd Mínima
-        ctk.CTkLabel(fr_inputs, text="AVISO MÍNIMO", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=3, padx=5, pady=(10, 0), sticky="w")
-        self.ent_qtd_minima = ctk.CTkEntry(fr_inputs, placeholder_text="3", height=40)
-        self.ent_qtd_minima.grid(row=1, column=3, padx=5, pady=(0, 15), sticky="ew")
-
-        # Coluna 4: Categoria
-        ctk.CTkLabel(fr_inputs, text="CATEGORIA", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=4, padx=5, pady=(10, 0), sticky="w")
-        self.combo_cat = ctk.CTkComboBox(fr_inputs, values=self.ESTOQUE_CATEGORIAS, height=40, state="readonly")
-        self.combo_cat.set("Selecione...")
-        self.combo_cat.grid(row=1, column=4, padx=5, pady=(0, 15), sticky="ew")
-
-        # Coluna 5: Fornecedor
-        ctk.CTkLabel(fr_inputs, text="FORNECEDOR", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=5, padx=5, pady=(10, 0), sticky="w")
-        self.combo_fornecedor = ctk.CTkComboBox(fr_inputs, values=["-"], height=40, state="readonly")
-        self.combo_fornecedor.set("-")
-        self.combo_fornecedor.grid(row=1, column=5, padx=5, pady=(0, 15), sticky="ew")
-        self.combo_fornecedor.bind("<Button-1>", self._atualizar_combo_fornecedores)
-
-        # Coluna 6: Botão Add Fornecedor
-        ctk.CTkLabel(fr_inputs, text="NOVO FORN.", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=6, padx=(5, 10), pady=(10, 0), sticky="w")
-        ctk.CTkButton(fr_inputs, text="+", command=self.add_fornecedor_dialog, width=40, height=40, fg_color="#333").grid(row=1, column=6, padx=(5, 10), pady=(0, 15), sticky="w")
-
-        # --- Botões de Ação ---
-        fr_botoes_acao = ctk.CTkFrame(parent, fg_color="transparent")
-        fr_botoes_acao.grid(row=4, column=0, sticky="ew", padx=30, pady=(5, 15))
-
-        ctk.CTkButton(fr_botoes_acao, text="💾 SALVAR PRODUTO", command=self.add_produto, fg_color=COR_SUCCESS, text_color="#003300", font=FONT_BOLD, height=45).pack(side="left", padx=(0, 10))
-        ctk.CTkButton(fr_botoes_acao, text="🧹 LIMPAR", command=self.limpar_campos, fg_color="#2B2B2B", text_color="white", height=45, width=100).pack(side="left", padx=5)
-        ctk.CTkButton(fr_botoes_acao, text="🗑️ REMOVER", command=self.del_produto, fg_color="transparent", border_width=1, border_color=COR_DANGER, text_color=COR_DANGER, height=45, width=100).pack(side="left", padx=5)
-        ctk.CTkButton(fr_botoes_acao, text="🎁 COMBOS/KITS", command=self._abrir_janela_combos, fg_color="#9C27B0", hover_color="#7B1FA2", font=FONT_BOLD, height=45, width=140).pack(side="left", padx=5)
-        ctk.CTkButton(fr_botoes_acao, text="📥 IMPORTAR ESTOQUE", command=self._abrir_importar_estoque, fg_color="#2196F3", hover_color="#1976D2", font=FONT_BOLD, height=45, width=180).pack(side="left", padx=5)
-        
-        ctk.CTkButton(fr_botoes_acao, text="🛒 GERAR LISTA DE COMPRAS", command=self.gerar_lista_compras, fg_color="#E91E63", hover_color="#C2185B", font=FONT_BOLD, height=45, width=220).pack(side="right")
-
-        # --- 4. Tabela (Treeview) ---
-        fr_tabela_container = ctk.CTkFrame(parent, fg_color="transparent")
-        fr_tabela_container.grid(row=5, column=0, sticky="nsew", padx=30, pady=12)
-
-        colunas = ["PRODUTO", "CATEGORIA", "NIVEL", "STATUS", "PRECO", "FORNECEDOR"]
-
-        style = ttk.Style()
-        style.configure("Treeview", rowheight=32, font=("Arial", 11))
-        style.configure("Treeview.Heading", font=("Arial", 11, "bold"))
-
-        self.tree_estoque = ttk.Treeview(fr_tabela_container, columns=colunas, show="headings", style="Treeview", selectmode="browse")
-
-        self.tree_estoque.heading("PRODUTO", text="PRODUTO", anchor="w")
-        self.tree_estoque.heading("CATEGORIA", text="CATEGORIA", anchor="w")
-        self.tree_estoque.heading("NIVEL", text="NÍVEL VISUAL", anchor="w")
-        self.tree_estoque.heading("STATUS", text="QTD / STATUS", anchor="center")
-        self.tree_estoque.heading("PRECO", text="PREÇO", anchor="e")
-        self.tree_estoque.heading("FORNECEDOR", text="FORNECEDOR", anchor="w")
-
-        self.tree_estoque.column("PRODUTO", width=250, minwidth=200)
-        self.tree_estoque.column("CATEGORIA", width=150, minwidth=120)
-        self.tree_estoque.column("NIVEL", width=110, minwidth=110)
-        self.tree_estoque.column("STATUS", width=130, anchor="center")
-        self.tree_estoque.column("PRECO", width=110, anchor="e")
-        self.tree_estoque.column("FORNECEDOR", width=150, anchor="w")
-
-        sc_y = ctk.CTkScrollbar(fr_tabela_container, command=self.tree_estoque.yview, fg_color="transparent", button_color=COR_BORDA)
-        self.tree_estoque.configure(yscroll=sc_y.set)
-
-        self.tree_estoque.pack(side="left", fill="both", expand=True)
-        sc_y.pack(side="right", fill="y")
-
-        self.tree_estoque.bind("<<TreeviewSelect>>", self.ao_selecionar_item)
-
-    # ================= LÓGICA DE DADOS =================
-
-    def carregar_estoque(self):
-        """Carrega o estoque do arquivo JSON, garantindo retorno de lista."""
-        try:
-            if os.path.exists("estoque.json"):
-                with open("estoque.json", "r", encoding="utf-8") as f:
-                    dados = json.load(f)
-                    # Conversão de legado (Dict -> Lista)
-                    if isinstance(dados, dict):
-                        lista_convertida = []
-                        for nome, qtd in dados.items():
-                            lista_convertida.append({
-                                "nome": nome,
-                                "estoque_fisico": qtd,
-                                "categoria": "📦 OUTROS", # Correção de legado
-                                "preco_venda": 0.0,
-                                "fornecedor": "-"
-                            })
-                        return lista_convertida
-                    # --- NOVO: TRAVA DE SEGURANÇA DE CATEGORIAS ---
-                    # Garante que o JSON não injete categorias que não existem no painel
-                    if isinstance(dados, list):
-                        for item in dados:
-                            cat_atual = item.get("categoria", "")
-                            if cat_atual not in self.ESTOQUE_CATEGORIAS:
-                                nova_cat = self.identificar_categoria(item.get("nome", ""))
-                                # Se a regra ainda devolver algo inválido, joga para OUTROS
-                                if nova_cat not in self.ESTOQUE_CATEGORIAS:
-                                    nova_cat = "📦 OUTROS"
-                                item["categoria"] = nova_cat
-                    # ----------------------------------------------
-                    return dados
-            return []
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []
-
-    def salvar_estoque_disk(self):
-        """Salva a lista de estoque no disco."""
-        try:
-            with open("estoque.json", 'w', encoding='utf-8') as f:
-                json.dump(self.estoque_data, f, indent=4, ensure_ascii=False)
-        except:
-            pass
-
-    def comando_buscar(self):
-        """Acionado pelo botão buscar ou Enter"""
-        termo = self.ent_busca.get()
-        self.atualizar_tabela_estoque(filtro=termo)
-
-    def limpar_campos(self):
-        """Limpa os inputs e tira a seleção da tabela"""
-        self.ent_prod.delete(0, 'end')
-        self.ent_preco.delete(0, 'end')
-        self.ent_qtd.delete(0, 'end')
-        self.ent_qtd_minima.delete(0, 'end')
-        self.combo_cat.set("Selecione a Categoria")
-        self.combo_fornecedor.set("Selecione o Fornecedor")
-        if self.tree_estoque.selection():
-            self.tree_estoque.selection_remove(self.tree_estoque.selection())
-
-    def ao_selecionar_item(self, _):
-        """Preenche os campos quando clica na tabela"""
-        selecao = self.tree_estoque.selection()
-        if not selecao: return
-
-        item = self.tree_estoque.item(selecao[0])
-        tags = item['tags']
-        
-        # Se clicou na categoria (pastinha), ignora
-        if 'categoria' in tags:
-            return
-
-        valores = item['values']
-        # values[0] é o nome com espaços visuais. Limpamos para buscar.
-        nome_sujo = valores[0].strip() 
-        
-        # Busca o item real na lista de dados para ter precisão nos números
-        item_real = next((i for i in self.estoque_data if i.get("nome", "").lower() == nome_sujo.lower()), None)
-        
-        if item_real:
-            self.ent_prod.delete(0, 'end')
-            self.ent_prod.insert(0, item_real.get("nome", "").title())
-            
-            self.ent_preco.delete(0, 'end')
-            self.ent_preco.insert(0, str(item_real.get("preco_venda", 0.0)))
-            
-            self.ent_qtd.delete(0, 'end')
-            self.ent_qtd.insert(0, str(item_real.get("estoque_fisico", 0)))
-
-            self.ent_qtd_minima.delete(0, 'end')
-            self.ent_qtd_minima.insert(0, str(item_real.get("quantidade_minima", 0)))
-
-            categoria = item_real.get("categoria") or self.identificar_categoria(item_real.get("nome", ""))
-            
-            # --- NOVO: TRAVA DO COMBOBOX ---
-            if categoria not in self.ESTOQUE_CATEGORIAS:
-                categoria = "📦 OUTROS"
-            # -------------------------------
-            
-            self.combo_cat.set(categoria)
-
-            fornecedor = item_real.get("fornecedor", "-").title()
-            self.combo_fornecedor.set(fornecedor)
-
-    def add_produto(self):
-        """Adiciona ou Atualiza produto."""
-        nome = self.ent_prod.get().strip().lower()
-        qtd_str = self.ent_qtd.get().strip()
-        preco_str = self.ent_preco.get().strip().replace(',', '.')
-        qtd_minima_str = self.ent_qtd_minima.get().strip()
-        categoria_selecionada = self.combo_cat.get()
-        
-        if "Selecione" in categoria_selecionada:
-            categoria = self.identificar_categoria(nome)
-            # --- NOVO: TRAVA AO SALVAR AUTOMÁTICO ---
-            if categoria not in self.ESTOQUE_CATEGORIAS:
-                categoria = "📦 OUTROS"
-            # ----------------------------------------
-        else:
-            categoria = categoria_selecionada
-        
-        if nome and qtd_str:
-            try:
-                qtd = float(qtd_str) if '.' in qtd_str else int(qtd_str)
-                preco = float(preco_str) if preco_str else 0.0
-                qtd_minima = float(qtd_minima_str) if '.' in qtd_minima_str else int(qtd_minima_str) if qtd_minima_str else 0
-                
-                # Verifica se já existe para atualizar
-                encontrado = False
-                for item in self.estoque_data:
-                    if item.get("nome", "").lower() == nome:
-                        item["estoque_fisico"] = qtd # Atualiza Qtd
-                        item["preco_venda"] = preco  # Atualiza Preço
-                        item["nome"] = nome # Garante que o nome seja salvo em minúsculo
-                        item["categoria"] = categoria # Atualiza a categoria
-                        item["quantidade_minima"] = qtd_minima # Atualiza a quantidade mínima
-                        encontrado = True
-                        break
-                
-                if not encontrado:
-                    self.estoque_data.append({
-                        "nome": nome,
-                        "estoque_fisico": qtd,
-                        "categoria": categoria,
-                        "preco_venda": preco,
-                        "fornecedor": "Manual",
-                        "quantidade_minima": qtd_minima
-                    })
-
-                self.salvar_estoque_disk()
-                self.atualizar_tabela_estoque()
-                self.limpar_campos()
-                self.mostrar_toast("Produto salvo!", "success")
-            except ValueError:
-                self.mostrar_toast("Erro: Preço ou Qtd inválidos", "error")
-
-    def del_produto(self):
-        """Remove produto selecionado da lista."""
-        nome = self.ent_prod.get().strip().lower()
-        if not nome:
-            self.mostrar_toast("Selecione um produto!", "error")
-            return
-            
-        self.estoque_data = [item for item in self.estoque_data if item.get("nome", "").lower() != nome]
-        
-        self.salvar_estoque_disk()
-        self.atualizar_tabela_estoque()
-        self.limpar_campos()
-        self.mostrar_toast("Produto removido!", "success")
-
-    # ================= VISUAL E UTILITÁRIOS =================
-
-    def gerar_barra_visual(self, atual, maximo=100):
-        tamanho_barra = 10
-        if maximo == 0: maximo = 1
-        divisor = maximo if atual <= maximo else atual
-        if divisor == 0: divisor = 1
-        percentual = min(atual / divisor, 1.0)
-        blocos_cheios = int(tamanho_barra * percentual)
-        blocos_vazios = tamanho_barra - blocos_cheios
-        return f"{'█' * blocos_cheios}{'░' * blocos_vazios}"
-
-    def identificar_categoria(self, nome_produto):
-        nome = str(nome_produto).lower()
-        regras = self.config_data.get("categorias_produtos", {})
-        for categoria, palavras in regras.items():
-            if any(p in nome for p in palavras):
-                return categoria
-        return "📦 OUTROS"
-
-    def atualizar_tabela_estoque(self, filtro="", filtro_categoria="Todas as Categorias", filtro_fornecedor="Todos os Fornecedores"):
-        # Limpa tabela visualmente
-        for item in self.tree_estoque.get_children(): 
-            self.tree_estoque.delete(item)
-        
-        # Import local para evitar erro se não estiver no topo
-        import unicodedata 
-
-        def normalizar_estoque_nome(nome):
-            if not nome: return ""
-            try:
-                nfkd = unicodedata.normalize('NFKD', str(nome))
-                t = "".join([c for c in nfkd if not unicodedata.combining(c)]).lower().strip()
-                for ch in "-_/()[]{}.,;:": t = t.replace(ch, " ")
-                return " ".join(t.split())
-            except: return str(nome).lower().strip()
-
-        # Termos ignorados na busca
-        termos_ignorar = ["vasilhame incluso", "pack 12", "pack12", "pack 18", "pack18"]
-        termos_ignorar_norm = [normalizar_estoque_nome(t) for t in termos_ignorar]
-
-        # Organização por Categoria
-        estoque_organizado = {}
-        termo_busca = filtro.lower() if filtro else ""
-
-        palavras_filtro = normalizar_estoque_nome(termo_busca).split()
-        for item in self.estoque_data:
-            nome_raw = item.get("nome", "Desconhecido")
-            nome_norm = normalizar_coquetel(normalizar_estoque_nome(nome_raw))
-            
-            # Aplica filtro de busca (termo)
-            if palavras_filtro and not all(normalizar_coquetel(p) in nome_norm for p in palavras_filtro):
-                    continue
-            # Pula packs se necessário
-            if any(t in nome_norm for t in termos_ignorar_norm):
-                continue
-            
-            cat = item.get("categoria", self.identificar_categoria(nome_raw))
-            forn = item.get("fornecedor", "-").title()
-
-            # Aplica filtro de categoria
-            if filtro_categoria != "Todas as Categorias" and cat != filtro_categoria:
-                continue
-            
-            # Aplica filtro de fornecedor
-            if filtro_fornecedor != "Todos os Fornecedores" and forn != filtro_fornecedor:
-                continue
-
-            if cat not in estoque_organizado: estoque_organizado[cat] = []
-            estoque_organizado[cat].append(item)
-
-        # Renderiza na Tabela
-        for categoria in sorted(estoque_organizado.keys()):
-            nome_cat = categoria.upper()
-            id_pai = self.tree_estoque.insert("", "end", values=[f"📂 {nome_cat}", "", "", "", "", ""], open=True, tags=("categoria",))
-            
-            # Produtos ordenados por nome
-            for item in sorted(estoque_organizado[categoria], key=lambda x: x.get("nome", "")):
-                nome = item.get("nome", "").title()
-                try:
-                    qtd = float(item.get("estoque_fisico", 0))
-                    preco = float(item.get("preco_venda", 0))
-                except: qtd = 0; preco = 0
-
-                forn = item.get("fornecedor", "-").title()
-
-                # Regras de Status
-                if qtd <= 0: status = "🚨 CRÍTICO"; tag = "critico"; limite = 20
-                elif qtd <= 3: status = "⚠️ BAIXO"; tag = "baixo"; limite = 50
-                else: status = "🔋 ESTÁVEL"; tag = "normal"; limite = 100
-
-                barra = self.gerar_barra_visual(qtd, limite)
-                qtd_visual = int(qtd) if qtd.is_integer() else f"{qtd:.2f}"
-                preco_visual = f"R$ {preco:.2f}"
-
-                self.tree_estoque.insert(id_pai, "end", 
-                                       values=[f"   {nome}", cat, barra, f"{qtd_visual} | {status}", preco_visual, forn], 
-                                       tags=(tag,))
-
-        # Cores das Tags
-        self.tree_estoque.tag_configure('categoria', background="#111", foreground=COR_AMARELO, font=("Roboto", 10, "bold"))
-        self.tree_estoque.tag_configure('critico', foreground=COR_DANGER, font=("Consolas", 10, "bold"))
-        self.tree_estoque.tag_configure('baixo', foreground="#FFD600", font=("Consolas", 10))
-        self.tree_estoque.tag_configure('normal', foreground="#00E676", font=("Consolas", 10))
-
-    def gerar_lista_compras(self):
-        """Gera arquivo de texto com itens críticos."""
-        if not self.estoque_data:
-            self.mostrar_toast("Estoque vazio!", "error")
-            return
-
-        ignore_list_str = self.config_data.get("compras_ignore_list", "")
-        ignore_list = [item.strip().lower() for item in ignore_list_str.split(',') if item.strip()]
-
-        compras = {}
-        itens_criticos = 0
-        
-        # Lógica de agrupamento com quantidade mínima configurável
-        for item in self.estoque_data:
-            try:
-                qtd = float(item.get("estoque_fisico", 0))
-                qtd_minima_item = float(item.get("quantidade_minima", 3)) # Pega a mínima ou usa 3 como padrão
-
-                if qtd <= qtd_minima_item:
-                    nome_original = item.get("nome", "")
-                    if nome_original.strip().lower() in ignore_list:
-                        continue
-
-                    forn = item.get("fornecedor", "OUTROS").upper()
-                    nome = nome_original.title()
-                    if forn not in compras: compras[forn] = []
-                    compras[forn].append((nome, qtd))
-                    itens_criticos += 1
-            except: continue
-
-        if itens_criticos == 0:
-            self.mostrar_toast("Estoque cheio! Nada para comprar.", "success")
-            return
-
-        nome_arquivo = f"Lista_Compras_{datetime.now().strftime('%d-%m-%Y')}.txt"
-        try:
-            with open(nome_arquivo, "w", encoding="utf-8") as f:
-                f.write(f"🛒 LISTA DE REPOSIÇÃO -  DELIVERY\n📅 {datetime.now().strftime('%d/%m/%Y')}\n\n")
-                for forn, itens in compras.items():
-                    f.write(f"🏢 {forn}\n" + "-"*30 + "\n")
-                    for nome, qtd in itens:
-                        f.write(f"[ ] {nome:<30} (Est.: {qtd})\n")
-                    f.write("\n")
-            
-            self.mostrar_toast(f"Lista gerada: {nome_arquivo}", "success")
-            os.startfile(nome_arquivo)
-        except Exception as e:
-            self.mostrar_toast(f"Erro: {e}", "error")
-
     def mostrar_toast(self, mensagem, tipo="info"):
         # Se você tiver uma função global de toast, use-a.
         # Caso contrário, usa messagebox simples
@@ -2750,7 +2279,6 @@ class PainelUltra(ctk.CTk):
             arq_excel = self._excel_path()
             if os.path.exists(arq_excel): shutil.copy2(arq_excel, os.path.join(dest, os.path.basename(arq_excel)))
             if os.path.exists(ARQUIVO_CONFIG): shutil.copy2(ARQUIVO_CONFIG, os.path.join(dest, "backup_config.json"))
-            if os.path.exists(ARQUIVO_ESTOQUE): shutil.copy2(ARQUIVO_ESTOQUE, os.path.join(dest, "backup_estoque.json"))
             self.mostrar_toast("Backup OK!", "success")
         except Exception as e:
             self.mostrar_toast(f"Erro: {e}", "error")
@@ -2781,902 +2309,6 @@ class PainelUltra(ctk.CTk):
 
         ctk.CTkButton(fr_input, text="ENVIAR", command=self.enviar_comando_robo, height=35, fg_color="#333").pack(side="right", padx=10)
 
-    # ==================================================================================
-    #  SEÇÃO 10.4: IMPORTAR ESTOQUE (XML/PDF/EXCEL)
-    # ==================================================================================
-    # Responsável por: Importar estoque de notas fiscais e documentos
-    # Suporta: XML (NFe), PDF, Excel - com conversão de unidades
-    # ==================================================================================
-
-    def _abrir_importar_estoque(self):
-        """Abre janela para importar estoque de documento"""
-        if hasattr(self, 'janela_importar') and self.janela_importar.winfo_exists():
-            self.janela_importar.focus()
-            return
-
-        self.janela_importar = ctk.CTkToplevel(self)
-        self.janela_importar.title("📥 Importar Estoque")
-        self.janela_importar.geometry("800x650")
-        self.janela_importar.configure(fg_color=COR_BG_APP)
-        self.janela_importar.transient(self)
-        self.janela_importar.grab_set()
-
-        parent = self.janela_importar
-        parent.grid_columnconfigure(0, weight=1)
-        parent.grid_rowconfigure(4, weight=1)
-
-        ctk.CTkLabel(parent, text="📥 IMPORTAR ESTOQUE DE DOCUMENTO", font=FONT_TITLE, text_color=COR_AMARELO).grid(row=0, column=0, pady=(20, 5))
-        ctk.CTkLabel(parent, text="Suporta: XML (Nota Fiscal), PDF e Excel", font=FONT_MAIN, text_color=COR_TEXT_SEC).grid(row=1, column=0, pady=(0, 15))
-
-        # --- Frame de Seleção de Arquivo ---
-        fr_arquivo = ctk.CTkFrame(parent, fg_color=COR_CARD_BG)
-        fr_arquivo.grid(row=2, column=0, sticky="ew", padx=30, pady=10)
-
-        ctk.CTkLabel(fr_arquivo, text="ARQUIVO:", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).pack(side="left", padx=10, pady=15)
-        
-        self.lbl_arquivo_importar = ctk.CTkLabel(fr_arquivo, text="Nenhum arquivo selecionado", font=FONT_MAIN, text_color=COR_TEXT_SEC)
-        self.lbl_arquivo_importar.pack(side="left", padx=10, fill="x", expand=True)
-
-        ctk.CTkButton(fr_arquivo, text="📂 SELECIONAR ARQUIVO", command=self._selecionar_arquivo_estoque, fg_color="#2196F3", hover_color="#1976D2", height=40, width=200).pack(side="right", padx=10, pady=10)
-
-        # --- Opções ---
-        fr_opcoes = ctk.CTkFrame(parent, fg_color=COR_CARD_BG)
-        fr_opcoes.grid(row=3, column=0, sticky="ew", padx=30, pady=10)
-
-        ctk.CTkLabel(fr_opcoes, text="MODO DE IMPORTAÇÃO:", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).pack(anchor="w", padx=15, pady=(15, 5))
-
-        self.modo_importacao = ctk.StringVar(value="adicionar")
-        
-        fr_radios = ctk.CTkFrame(fr_opcoes, fg_color="transparent")
-        fr_radios.pack(anchor="w", padx=15, pady=5)
-        
-        ctk.CTkRadioButton(fr_radios, text="➕ ADICIONAR ao estoque atual (soma as quantidades)", variable=self.modo_importacao, value="adicionar", font=FONT_MAIN).pack(anchor="w", pady=3)
-        ctk.CTkRadioButton(fr_radios, text="🔄 SUBSTITUIR estoque (zera e importa novo)", variable=self.modo_importacao, value="substituir", font=FONT_MAIN).pack(anchor="w", pady=3)
-
-        ctk.CTkLabel(fr_opcoes, text="", height=10).pack()
-
-        # --- Preview dos itens ---
-        fr_preview = ctk.CTkFrame(parent, fg_color=COR_CARD_BG, border_width=1, border_color=COR_BORDA)
-        fr_preview.grid(row=4, column=0, sticky="nsew", padx=30, pady=10)
-
-        ctk.CTkLabel(fr_preview, text="PREVIEW DOS ITENS A IMPORTAR:", font=("Segoe UI Bold", 12), text_color=COR_TEXT_SEC).pack(pady=(15, 5), anchor="w", padx=15)
-
-        self.txt_preview_importar = tk.Text(fr_preview, bg=COR_CARD_BG, fg="white", bd=0, highlightthickness=0, font=("Consolas", 10), height=15)
-        self.txt_preview_importar.pack(fill="both", expand=True, padx=15, pady=(5, 10))
-        self.txt_preview_importar.insert("1.0", "Selecione um arquivo para ver o preview...")
-        self.txt_preview_importar.config(state="disabled")
-
-        # --- Botão Confirmar ---
-        fr_btns = ctk.CTkFrame(parent, fg_color="transparent")
-        fr_btns.grid(row=5, column=0, pady=15)
-
-        ctk.CTkButton(fr_btns, text="✅ CONFIRMAR IMPORTAÇÃO", command=self._confirmar_importacao_estoque, fg_color=COR_SUCCESS, height=50, width=250, font=FONT_BOLD).pack(side="left", padx=10)
-        ctk.CTkButton(fr_btns, text="❌ CANCELAR", command=self.janela_importar.destroy, fg_color=COR_DANGER, height=50, width=120).pack(side="left", padx=10)
-
-        self.itens_para_importar = []
-        self.arquivo_importar_path = None
-
-    def _selecionar_arquivo_estoque(self):
-        """Abre diálogo para selecionar arquivo de estoque"""
-        arquivo = filedialog.askopenfilename(
-            title="Selecionar arquivo de estoque",
-            filetypes=[
-                ("Todos suportados", "*.xml;*.pdf;*.xlsx;*.xls;*.csv"),
-                ("XML (Nota Fiscal)", "*.xml"),
-                ("PDF", "*.pdf"),
-                ("Excel", "*.xlsx;*.xls"),
-                ("CSV", "*.csv"),
-            ]
-        )
-
-        if not arquivo:
-            return
-
-        self.arquivo_importar_path = arquivo
-        nome_arquivo = os.path.basename(arquivo)
-        self.lbl_arquivo_importar.configure(text=nome_arquivo)
-
-        # Processa o arquivo
-        self._processar_arquivo_estoque(arquivo)
-
-    def _processar_arquivo_estoque(self, caminho):
-        """Processa o arquivo e extrai os itens"""
-        ext = os.path.splitext(caminho)[1].lower()
-
-        try:
-            if ext == '.xml':
-                itens = self._ler_xml_nfe(caminho)
-            elif ext == '.pdf':
-                itens = self._ler_pdf_estoque(caminho)
-            elif ext in ['.xlsx', '.xls']:
-                itens = self._ler_excel_estoque(caminho)
-            elif ext == '.csv':
-                itens = self._ler_csv_estoque(caminho)
-            else:
-                self.mostrar_toast("Formato não suportado!", "error")
-                return
-
-            # Consolida itens duplicados (soma quantidades do mesmo produto)
-            itens = self._consolidar_itens_duplicados(itens)
-
-            self.itens_para_importar = itens
-
-            # Atualiza preview
-            self.txt_preview_importar.config(state="normal")
-            self.txt_preview_importar.delete("1.0", tk.END)
-
-            if not itens:
-                self.txt_preview_importar.insert("1.0", "⚠️ Nenhum item encontrado no arquivo!")
-            else:
-                self.txt_preview_importar.insert("1.0", f"✅ {len(itens)} itens encontrados:\n\n")
-                for item in itens:
-                    nome = item.get("nome", "?")
-                    qtd = item.get("quantidade", 0)
-                    fornecedor = item.get("fornecedor", "-")
-                    categoria = item.get("categoria", "-")
-                    preco = item.get("preco", 0)
-                    self.txt_preview_importar.insert(tk.END, f"  • {nome}  |  Qtd: {qtd}  |  R$ {preco:.2f}  |  {categoria}  |  {fornecedor}\n")
-
-            self.txt_preview_importar.config(state="disabled")
-
-        except Exception as e:
-            self.mostrar_toast(f"Erro ao ler arquivo: {e}", "error")
-            import traceback
-            traceback.print_exc()
-
-    def _ler_xml_nfe(self, caminho):
-        """Lê XML de Nota Fiscal Eletrônica (NFe)"""
-        import xml.etree.ElementTree as ET
-        
-        tree = ET.parse(caminho)
-        root = tree.getroot()
-
-        # Namespace comum da NFe
-        ns = {'nfe': 'http://www.portalfiscal.inf.br/nfe'}
-
-        itens = []
-
-        # Tenta encontrar elementos det (detalhes do produto)
-        for det in root.findall('.//nfe:det', ns) or root.findall('.//det'):
-            try:
-                # Tenta com namespace
-                prod = det.find('nfe:prod', ns) or det.find('prod')
-                if prod is None:
-                    continue
-
-                nome_elem = prod.find('nfe:xProd', ns) or prod.find('xProd')
-                qtd_elem = prod.find('nfe:qCom', ns) or prod.find('qCom')
-                unid_elem = prod.find('nfe:uCom', ns) or prod.find('uCom')
-                preco_elem = prod.find('nfe:vUnCom', ns) or prod.find('vUnCom')
-
-                nome = nome_elem.text if nome_elem is not None else "Produto"
-                qtd_raw = float(qtd_elem.text) if qtd_elem is not None else 1
-                unidade = unid_elem.text if unid_elem is not None else "UN"
-                preco = float(preco_elem.text) if preco_elem is not None else 0
-
-                # Converte unidades (ex: CX/12, PCT/6, FD/24)
-                qtd_final = self._converter_unidade_estoque(qtd_raw, unidade, nome)
-
-                itens.append({
-                    "nome": nome.strip().title(),
-                    "quantidade": qtd_final,
-                    "unidade": unidade,
-                    "preco": preco
-                })
-
-            except Exception as e:
-                print(f"Erro ao processar item XML: {e}")
-                continue
-
-        return itens
-
-    def _ler_pdf_estoque(self, caminho):
-        """Lê PDF para extrair itens de estoque"""
-        try:
-            import pdfplumber
-        except ImportError:
-            self.mostrar_toast("Instale: pip install pdfplumber", "error")
-            return []
-
-        itens = []
-
-        with pdfplumber.open(caminho) as pdf:
-            texto_completo = ""
-            for page in pdf.pages:
-                texto_completo += page.extract_text() or ""
-
-        # Tenta encontrar padrões de produtos
-        # Padrão comum: NOME_PRODUTO | QTD | UNIDADE | PREÇO
-        linhas = texto_completo.split('\n')
-
-        for linha in linhas:
-            # Padrões comuns de notas fiscais
-            # Ex: "CERVEJA SKOL LATA 350ML  24  CX  89.90"
-            match = re.search(r'([A-Za-zÀ-ú0-9\s\.\-]+?)\s+(\d+[\.,]?\d*)\s+(UN|CX|PCT|FD|PC|KG|LT|L|ML|G|DZ|UNID|CAIXA|FARDO|PACOTE)\s+(\d+[\.,]?\d*)', linha, re.IGNORECASE)
-            
-            if match:
-                nome = match.group(1).strip()
-                qtd = float(match.group(2).replace(',', '.'))
-                unidade = match.group(3).upper()
-                preco = float(match.group(4).replace(',', '.'))
-
-                # Ignora linhas que parecem cabeçalhos
-                if any(x in nome.lower() for x in ['descricao', 'produto', 'item', 'total']):
-                    continue
-
-                qtd_final = self._converter_unidade_estoque(qtd, unidade, nome)
-
-                itens.append({
-                    "nome": nome.title(),
-                    "quantidade": qtd_final,
-                    "unidade": unidade,
-                    "preco": preco
-                })
-
-        return itens
-
-    def _ler_excel_estoque(self, caminho):
-        """Lê Excel para extrair itens de estoque"""
-        itens = []
-
-        wb = openpyxl.load_workbook(caminho, data_only=True)
-        ws = wb.active
-
-        # Procura a linha de cabeçalho (pode não ser a linha 1)
-        # O arquivo pode ter data/hora, "admin", linhas vazias antes dos cabeçalhos
-        linha_cabecalho = 1
-        cabecalhos = {}
-        
-        for row_idx in range(1, min(20, ws.max_row + 1)):  # Procura nas primeiras 20 linhas
-            row_values = [str(cell.value or "").lower().strip() for cell in ws[row_idx]]
-            row_text = " ".join(row_values)
-            
-            # Identifica linha de cabeçalho se tiver "produtos" ou "fornecedor" + "categoria"
-            if 'produtos' in row_text or 'produto' in row_text or ('fornecedor' in row_text and 'categoria' in row_text):
-                linha_cabecalho = row_idx
-                
-                # Detecta colunas dinamicamente pelo nome do cabeçalho
-                for col_idx, cell in enumerate(ws[row_idx]):
-                    if cell.value:
-                        val = str(cell.value).lower().strip()
-                        
-                        if val == 'fornecedor':
-                            cabecalhos['fornecedor'] = col_idx
-                        elif val in ['produtos', 'produto', 'descrição', 'descricao', 'nome', 'item']:
-                            cabecalhos['nome'] = col_idx
-                        elif 'físico' in val or 'fisico' in val or val == 'estoque' or val == 'qtd' or val == 'quantidade':
-                            cabecalhos['qtd'] = col_idx
-                        elif 'preço de venda' in val or 'preco de venda' in val or val == 'preço' or val == 'preco' or val == 'valor':
-                            cabecalhos['preco'] = col_idx
-                        elif val == 'categoria' or val == 'tipo' or val == 'grupo':
-                            cabecalhos['categoria'] = col_idx
-                        elif val == 'status':
-                            cabecalhos['status'] = col_idx
-                
-                break
-        
-        # Se não achou cabeçalhos, assume ordem padrão
-        if 'nome' not in cabecalhos:
-            cabecalhos = {'nome': 1, 'categoria': 2, 'qtd': 5, 'preco': 10}
-            linha_cabecalho = 1
-        
-        print(f"DEBUG: Cabeçalhos encontrados na linha {linha_cabecalho}: {cabecalhos}")
-
-        # Lê as linhas de dados (começando após o cabeçalho)
-        for row in ws.iter_rows(min_row=linha_cabecalho + 1, values_only=True):
-            try:
-                # Pula linhas vazias
-                if not row or not any(row):
-                    continue
-                
-                nome = str(row[cabecalhos.get('nome', 1)] or "").strip()
-                if not nome or nome.lower() in ['', 'none', 'nan', 'total', 'subtotal']:
-                    continue
-
-                # Quantidade
-                qtd_idx = cabecalhos.get('qtd', 5)
-                qtd_raw = row[qtd_idx] if len(row) > qtd_idx else 0
-                qtd_raw = qtd_raw or 0
-                
-                qtd_raw = self._limpar_numero_brasileiro(qtd_raw)
-
-                # Preço (opcional)
-                preco_raw = 0
-                if 'preco' in cabecalhos and len(row) > cabecalhos['preco']:
-                    preco_val = row[cabecalhos['preco']]
-                    preco_raw = self._limpar_numero_brasileiro(preco_val)
-
-                # Categoria (opcional)
-                categoria = ""
-                if 'categoria' in cabecalhos and len(row) > cabecalhos['categoria']:
-                    categoria = str(row[cabecalhos['categoria']] or "").strip()
-
-                # Fornecedor (opcional) - coluna 0
-                fornecedor = ""
-                if 'fornecedor' in cabecalhos:
-                    forn_idx = cabecalhos['fornecedor']
-                    if len(row) > forn_idx and row[forn_idx]:
-                        fornecedor = str(row[forn_idx]).strip()
-                        print(f"DEBUG Fornecedor: '{fornecedor}' para produto '{nome}'")
-
-                qtd_final = self._converter_unidade_estoque(qtd_raw, "UN", nome)
-
-                itens.append({
-                    "nome": nome.title(),
-                    "quantidade": qtd_final,
-                    "unidade": "UN",
-                    "preco": preco_raw,
-                    "categoria": categoria,
-                    "fornecedor": fornecedor
-                })
-
-            except Exception as e:
-                print(f"Erro ao processar linha Excel: {e}")
-                continue
-
-        return itens
-
-    def _limpar_numero_brasileiro(self, valor):
-        """
-        Converte números com formatação brasileira para float.
-        Exemplos:
-          "1.334.00" -> 1334.0 (milhar com ponto, centavos com ponto)
-          "1.334,00" -> 1334.0 (milhar com ponto, centavos com vírgula)
-          "1334,50"  -> 1334.5
-          "1334.50"  -> 1334.5
-          1334       -> 1334.0
-        """
-        if valor is None:
-            return 0.0
-        
-        if isinstance(valor, (int, float)):
-            return float(valor)
-        
-        if not isinstance(valor, str):
-            return 0.0
-        
-        valor = valor.strip().replace('R$', '').replace(' ', '')
-        
-        if not valor:
-            return 0.0
-        
-        # Conta pontos e vírgulas
-        pontos = valor.count('.')
-        virgulas = valor.count(',')
-        
-        # Caso: "1.334.00" ou "1.334,00" (milhar + decimais)
-        if pontos >= 2:
-            # Remove todos os pontos exceto o último (assume que é decimal)
-            # Mas se termina com ".00", provavelmente é inteiro
-            if valor.endswith('.00'):
-                # É um número inteiro formatado: 1.334.00 = 1334
-                valor = valor.replace('.', '')
-            else:
-                # Remove pontos de milhar, mantém último como decimal
-                partes = valor.rsplit('.', 1)
-                valor = partes[0].replace('.', '') + '.' + partes[1]
-        elif pontos == 1 and virgulas == 1:
-            # Formato: "1.334,50" - ponto é milhar, vírgula é decimal
-            valor = valor.replace('.', '').replace(',', '.')
-        elif virgulas == 1:
-            # Formato: "1334,50" ou "1,5"
-            valor = valor.replace(',', '.')
-        elif pontos == 1:
-            # Formato: "1334.50" - já está ok
-            pass
-        
-        try:
-            return float(valor)
-        except ValueError:
-            print(f"DEBUG: Não conseguiu converter '{valor}' para número")
-            return 0.0
-
-    def _ler_csv_estoque(self, caminho):
-        """Lê CSV para extrair itens de estoque"""
-        import csv
-        itens = []
-
-        # Detecta encoding
-        encodings = ['utf-8', 'latin-1', 'cp1252']
-        conteudo = None
-        
-        for enc in encodings:
-            try:
-                with open(caminho, 'r', encoding=enc) as f:
-                    conteudo = f.read()
-                break
-            except UnicodeDecodeError:
-                continue
-        
-        if not conteudo:
-            self.mostrar_toast("Erro ao ler encoding do CSV", "error")
-            return []
-
-        # Detecta delimitador
-        delimitador = ','
-        if conteudo.count(';') > conteudo.count(','):
-            delimitador = ';'
-        elif conteudo.count('\t') > conteudo.count(','):
-            delimitador = '\t'
-
-        linhas = conteudo.strip().split('\n')
-        
-        # Detecta cabeçalhos na primeira linha
-        cabecalhos = {}
-        primeira_linha = linhas[0].split(delimitador)
-        
-        for col_idx, cell in enumerate(primeira_linha):
-            val = cell.lower().strip().strip('"')
-            if any(x in val for x in ['produto', 'descri', 'nome', 'item']):
-                cabecalhos['nome'] = col_idx
-            elif any(x in val for x in ['qtd', 'quant', 'quantidade']):
-                cabecalhos['qtd'] = col_idx
-            elif any(x in val for x in ['unid', 'un', 'medida']):
-                cabecalhos['unidade'] = col_idx
-            elif any(x in val for x in ['preco', 'preço', 'valor', 'unit']):
-                cabecalhos['preco'] = col_idx
-
-        # Se não achou cabeçalhos, assume: A=nome, B=unidade, C=preço, D=quantidade
-        if 'nome' not in cabecalhos:
-            cabecalhos = {'nome': 0, 'unidade': 1, 'preco': 2, 'qtd': 3}
-            inicio = 0  # Sem cabeçalho, começa da primeira linha
-        else:
-            inicio = 1  # Pula cabeçalho
-
-        for linha in linhas[inicio:]:
-            try:
-                cols = linha.split(delimitador)
-                cols = [c.strip().strip('"') for c in cols]
-                
-                if len(cols) <= cabecalhos.get('nome', 0):
-                    continue
-
-                nome = cols[cabecalhos.get('nome', 0)].strip()
-                if not nome or nome.lower() in ['', 'none', 'nan']:
-                    continue
-
-                # Quantidade na coluna D (índice 3)
-                qtd_raw = cols[cabecalhos.get('qtd', 3)] if len(cols) > cabecalhos.get('qtd', 3) else '0'
-                qtd_raw = float(qtd_raw.replace(',', '.').replace(' ', '') or '0')
-
-                unidade = cols[cabecalhos.get('unidade', 1)].upper() if len(cols) > cabecalhos.get('unidade', 1) else 'UN'
-
-                preco_raw = cols[cabecalhos.get('preco', 2)] if len(cols) > cabecalhos.get('preco', 2) else '0'
-                preco_raw = float(preco_raw.replace(',', '.').replace('R$', '').strip() or '0')
-
-                qtd_final = self._converter_unidade_estoque(qtd_raw, unidade, nome)
-
-                itens.append({
-                    "nome": nome.title(),
-                    "quantidade": qtd_final,
-                    "unidade": unidade,
-                    "preco": preco_raw
-                })
-
-            except Exception as e:
-                print(f"Erro ao processar linha CSV: {e}")
-                continue
-
-        return itens
-
-    def _converter_unidade_estoque(self, quantidade, unidade, nome_produto):
-        """
-        Converte unidades de compra para unidades de venda.
-        Ex: 2 CX de cerveja com 12 latas = 24 unidades
-        """
-        unidade = str(unidade).upper().strip()
-        nome_lower = nome_produto.lower()
-
-        # Detecta quantidade por unidade no formato "CX/12", "PCT/6", "FD/24"
-        match_qtd = re.search(r'(\d+)\s*(un|unid|unidades?)?', unidade)
-        if '/' in unidade:
-            partes = unidade.split('/')
-            if len(partes) == 2 and partes[1].isdigit():
-                multiplicador = int(partes[1])
-                return int(quantidade * multiplicador)
-
-        # Padrões comuns de embalagem para cervejas/bebidas
-        conversoes = {
-            'CX': 12,      # Caixa geralmente 12 unidades
-            'CAIXA': 12,
-            'FD': 24,      # Fardo geralmente 24 unidades
-            'FARDO': 24,
-            'PCT': 6,      # Pacote/Pack geralmente 6
-            'PACK': 6,
-            'PACOTE': 6,
-            'DZ': 12,      # Dúzia
-            'DUZIA': 12,
-        }
-
-        # Verifica se tem número no nome do produto indicando quantidade
-        # Ex: "CERVEJA SKOL 350ML CX C/12" ou "PACK C/ 6"
-        match_cx = re.search(r'(?:c/?|com\s*)(\d+)', nome_lower)
-        if match_cx:
-            multiplicador = int(match_cx.group(1))
-            return int(quantidade * multiplicador)
-
-        # Usa conversão padrão se for unidade conhecida
-        if unidade in conversoes:
-            # Tenta detectar pelo nome se é cerveja/bebida
-            if any(x in nome_lower for x in ['cerveja', 'lata', 'long neck', 'garrafa', 'pet', 'refrigerante', 'suco', 'agua', 'água']):
-                return int(quantidade * conversoes[unidade])
-
-        # Unidades que não precisam conversão
-        if unidade in ['UN', 'UNID', 'UNIDADE', 'PC', 'PÇ', 'PEÇA', 'KG', 'G', 'L', 'LT', 'ML']:
-            return quantidade
-
-        return quantidade
-
-    def _consolidar_itens_duplicados(self, itens):
-        """
-        Consolida itens duplicados na lista, somando as quantidades.
-        Ex: Se a nota tem "Cerveja Skol" 2x, soma as quantidades.
-        """
-        consolidado = {}
-        
-        for item in itens:
-            nome = item.get("nome", "").strip().lower()
-            
-            if nome in consolidado:
-                # Soma a quantidade
-                consolidado[nome]["quantidade"] += item.get("quantidade", 0)
-                # Mantém o maior preço (ou atualiza se for maior)
-                if item.get("preco", 0) > consolidado[nome].get("preco", 0):
-                    consolidado[nome]["preco"] = item.get("preco", 0)
-                # Mantém fornecedor e categoria se não tiver
-                if not consolidado[nome].get("fornecedor") and item.get("fornecedor"):
-                    consolidado[nome]["fornecedor"] = item.get("fornecedor")
-                if not consolidado[nome].get("categoria") and item.get("categoria"):
-                    consolidado[nome]["categoria"] = item.get("categoria")
-            else:
-                consolidado[nome] = {
-                    "nome": item.get("nome", "").strip().title(),
-                    "quantidade": item.get("quantidade", 0),
-                    "unidade": item.get("unidade", "UN"),
-                    "preco": item.get("preco", 0),
-                    "fornecedor": item.get("fornecedor", ""),
-                    "categoria": item.get("categoria", "")
-                }
-        
-        return list(consolidado.values())
-
-    def _confirmar_importacao_estoque(self):
-        """Confirma e executa a importação do estoque"""
-        if not self.itens_para_importar:
-            self.mostrar_toast("Nenhum item para importar!", "error")
-            return
-
-        modo = self.modo_importacao.get()
-
-        try:
-            # Carrega estoque atual
-            estoque_atual = []
-            if os.path.exists('estoque.json'):
-                try:
-                    with open('estoque.json', 'r', encoding='utf-8') as f:
-                        conteudo = f.read().strip()
-                        if conteudo:
-                            estoque_atual = json.loads(conteudo)
-                except (json.JSONDecodeError, Exception) as e:
-                    print(f"Aviso: estoque.json inválido ou vazio, iniciando novo: {e}")
-                    estoque_atual = []
-
-            # Garante que é lista
-            if isinstance(estoque_atual, dict):
-                estoque_atual = [{"nome": k, "estoque_fisico": v} for k, v in estoque_atual.items()]
-
-            # Se modo substituir, zera apenas os itens que estão na lista de importação
-            nomes_importar = set()
-            if modo == "substituir":
-                for item_import in self.itens_para_importar:
-                    nomes_importar.add(item_import["nome"].lower().strip())
-                
-                for item in estoque_atual:
-                    nome_estoque = item.get("nome", "").lower().strip()
-                    # Só zera se o produto está na lista de importação
-                    for nome_import in nomes_importar:
-                        if nome_import == nome_estoque or nome_import in nome_estoque or nome_estoque in nome_import:
-                            item["estoque_fisico"] = 0
-                            break
-
-            # Processa itens importados
-            itens_novos = 0
-            itens_atualizados = 0
-
-            for item_import in self.itens_para_importar:
-                nome_import = item_import["nome"].lower().strip()
-                qtd_import = item_import["quantidade"]
-                preco_import = item_import.get("preco", 0)
-
-                # Procura item existente
-                encontrado = False
-                for item_estoque in estoque_atual:
-                    nome_estoque = item_estoque.get("nome", "").lower().strip()
-                    
-                    # Match flexível (contém ou similar)
-                    if nome_import == nome_estoque or nome_import in nome_estoque or nome_estoque in nome_import:
-                        if modo == "adicionar":
-                            item_estoque["estoque_fisico"] = float(item_estoque.get("estoque_fisico", 0)) + qtd_import
-                        else:
-                            item_estoque["estoque_fisico"] = qtd_import
-                        
-                        if preco_import > 0:
-                            item_estoque["preco_venda"] = preco_import
-                        
-                        # Atualiza fornecedor e categoria se vieram no arquivo
-                        fornecedor_import = item_import.get("fornecedor", "").strip()
-                        print(f"DEBUG ATUALIZA: '{item_import['nome']}' forn='{fornecedor_import}'")
-                        if fornecedor_import and fornecedor_import != "-":
-                            item_estoque["fornecedor"] = fornecedor_import
-                            print(f"  -> Atualizou fornecedor para '{fornecedor_import}'")
-                        
-                        categoria_import = item_import.get("categoria", "").strip()
-                        if categoria_import:
-                            item_estoque["categoria"] = categoria_import
-                        
-                        encontrado = True
-                        itens_atualizados += 1
-                        break
-
-                # Se não encontrou, adiciona como novo
-                if not encontrado:
-                    # Usa categoria e fornecedor do arquivo se disponíveis
-                    categoria = item_import.get("categoria", "").strip()
-                    if not categoria:
-                        categoria = self.identificar_categoria(item_import["nome"])
-                    
-                    fornecedor = item_import.get("fornecedor", "").strip()
-                    print(f"DEBUG NOVO: '{item_import['nome']}' forn_import='{fornecedor}'")
-                    if not fornecedor:
-                        fornecedor = "-"
-                    
-                    novo_item = {
-                        "nome": item_import["nome"],
-                        "estoque_fisico": qtd_import,
-                        "preco_venda": preco_import,
-                        "quantidade_minima": 3,
-                        "categoria": categoria,
-                        "fornecedor": fornecedor
-                    }
-                    print(f"  -> Salvando com fornecedor='{fornecedor}'")
-                    estoque_atual.append(novo_item)
-                    itens_novos += 1
-
-            # Salva estoque atualizado
-            with open('estoque.json', 'w', encoding='utf-8') as f:
-                json.dump(estoque_atual, f, indent=4, ensure_ascii=False)
-
-            self.estoque_data = estoque_atual
-            self.atualizar_tabela_estoque()
-
-            msg = f"✅ Importação concluída!\n{itens_atualizados} atualizados, {itens_novos} novos"
-            self.mostrar_toast(msg, "success")
-            self.janela_importar.destroy()
-
-        except Exception as e:
-            self.mostrar_toast(f"Erro na importação: {e}", "error")
-            import traceback
-            traceback.print_exc()
-
-    # ==================================================================================
-    #  SEÇÃO 10.5: JANELA COMBOS/KITS
-    # ==================================================================================
-    # Responsável por: Gerenciamento de combos/kits de produtos compostos
-    # Ex: "Sacooler com Gelo" = Gelo 3.5kg (0.5) + Sacooler (1)
-    # ==================================================================================
-
-    def _abrir_janela_combos(self):
-        """Abre janela popup para gerenciar combos/kits"""
-        # Verifica se já existe uma janela aberta
-        if hasattr(self, 'janela_combos') and self.janela_combos.winfo_exists():
-            self.janela_combos.focus()
-            return
-
-        self.janela_combos = ctk.CTkToplevel(self)
-        self.janela_combos.title("🎁 Gerenciador de Combos/Kits")
-        self.janela_combos.geometry("700x600")
-        self.janela_combos.configure(fg_color=COR_BG_APP)
-        self.janela_combos.transient(self)
-        self.janela_combos.grab_set()
-
-        parent = self.janela_combos
-        parent.grid_columnconfigure(0, weight=1)
-        parent.grid_rowconfigure(3, weight=1)
-
-        ctk.CTkLabel(parent, text="COMBOS / KITS DE PRODUTOS", font=FONT_TITLE, text_color=COR_AMARELO).grid(row=0, column=0, pady=(20, 5))
-        ctk.CTkLabel(parent, text="Configure produtos compostos que baixam múltiplos itens do estoque", font=FONT_MAIN, text_color=COR_TEXT_SEC).grid(row=1, column=0, pady=(0, 15))
-
-        # --- Frame de Inputs ---
-        fr_inputs = ctk.CTkFrame(parent, fg_color=COR_CARD_BG)
-        fr_inputs.grid(row=2, column=0, sticky="ew", padx=30, pady=10)
-
-        ctk.CTkLabel(fr_inputs, text="NOME DO COMBO (como aparece no Zé):", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=0, column=0, padx=10, pady=(10, 0), sticky="w", columnspan=3)
-        self.ent_combo_nome = ctk.CTkEntry(fr_inputs, placeholder_text="Ex: seu pedido com gelo na sacooler", height=40, width=400)
-        self.ent_combo_nome.grid(row=1, column=0, padx=10, pady=(5, 10), sticky="w", columnspan=3)
-
-        ctk.CTkLabel(fr_inputs, text="COMPONENTES (nome do estoque | quantidade):", font=("Segoe UI Bold", 11), text_color=COR_TEXT_SEC).grid(row=2, column=0, padx=10, pady=(10, 0), sticky="w", columnspan=3)
-
-        # Frame para adicionar componentes
-        fr_comp = ctk.CTkFrame(fr_inputs, fg_color="transparent")
-        fr_comp.grid(row=3, column=0, padx=10, pady=5, sticky="ew", columnspan=3)
-
-        self.ent_comp_nome = ctk.CTkEntry(fr_comp, placeholder_text="Nome do produto no estoque", height=35, width=250)
-        self.ent_comp_nome.pack(side="left", padx=(0, 10))
-
-        self.ent_comp_qtd = ctk.CTkEntry(fr_comp, placeholder_text="Qtd", height=35, width=80)
-        self.ent_comp_qtd.pack(side="left", padx=(0, 10))
-
-        ctk.CTkButton(fr_comp, text="+ ADICIONAR", command=self._adicionar_componente_combo, height=35, fg_color=COR_SUCCESS, width=120).pack(side="left")
-
-        # Lista de componentes temporários
-        self.combo_componentes_temp = []
-        self.lbl_componentes = ctk.CTkLabel(fr_inputs, text="Componentes: (nenhum)", font=FONT_MAIN, text_color=COR_TEXT_SEC)
-        self.lbl_componentes.grid(row=4, column=0, padx=10, pady=10, sticky="w", columnspan=3)
-
-        # Botões de ação
-        fr_acoes = ctk.CTkFrame(fr_inputs, fg_color="transparent")
-        fr_acoes.grid(row=5, column=0, padx=10, pady=10, sticky="ew", columnspan=3)
-
-        ctk.CTkButton(fr_acoes, text="💾 SALVAR COMBO", command=self._salvar_combo, height=40, fg_color=COR_SUCCESS, width=150).pack(side="left", padx=5)
-        ctk.CTkButton(fr_acoes, text="🗑️ LIMPAR", command=self._limpar_combo, height=40, fg_color=COR_CARD_BG, width=100).pack(side="left", padx=5)
-
-        # --- Lista de Combos Existentes ---
-        fr_lista = ctk.CTkFrame(parent, fg_color=COR_CARD_BG, border_width=1, border_color=COR_BORDA)
-        fr_lista.grid(row=3, column=0, sticky="nsew", padx=30, pady=10)
-
-        ctk.CTkLabel(fr_lista, text="COMBOS CONFIGURADOS:", font=("Segoe UI Bold", 12), text_color=COR_TEXT_SEC).pack(pady=(15, 5), anchor="w", padx=15)
-
-        self.lst_combos = tk.Listbox(fr_lista, bg=COR_CARD_BG, fg="white", bd=0, highlightthickness=0, font=("Roboto", 11), selectbackground="#333", height=12)
-        self.lst_combos.pack(fill="both", expand=True, padx=15, pady=(5, 10))
-        self.lst_combos.bind("<<ListboxSelect>>", self._ao_selecionar_combo)
-
-        fr_btns_lista = ctk.CTkFrame(fr_lista, fg_color="transparent")
-        fr_btns_lista.pack(pady=(0, 15))
-
-        ctk.CTkButton(fr_btns_lista, text="🗑️ EXCLUIR SELECIONADO", command=self._excluir_combo, height=35, fg_color="#8B0000", width=180).pack(side="left", padx=5)
-
-        self._carregar_lista_combos()
-
-    def _adicionar_componente_combo(self):
-        """Adiciona um componente à lista temporária"""
-        nome = self.ent_comp_nome.get().strip()
-        qtd_str = self.ent_comp_qtd.get().strip()
-
-        if not nome or not qtd_str:
-            self.mostrar_toast("Preencha nome e quantidade!", "error")
-            return
-
-        try:
-            qtd = float(qtd_str)
-        except:
-            self.mostrar_toast("Quantidade inválida!", "error")
-            return
-
-        self.combo_componentes_temp.append({"nome": nome, "qtd": qtd})
-        self._atualizar_label_componentes()
-
-        self.ent_comp_nome.delete(0, 'end')
-        self.ent_comp_qtd.delete(0, 'end')
-
-    def _atualizar_label_componentes(self):
-        """Atualiza o label mostrando os componentes adicionados"""
-        if not self.combo_componentes_temp:
-            self.lbl_componentes.configure(text="Componentes: (nenhum)")
-        else:
-            txt = "Componentes: " + ", ".join([f"{c['qtd']}x {c['nome']}" for c in self.combo_componentes_temp])
-            self.lbl_componentes.configure(text=txt)
-
-    def _limpar_combo(self):
-        """Limpa os campos de combo"""
-        self.ent_combo_nome.delete(0, 'end')
-        self.ent_comp_nome.delete(0, 'end')
-        self.ent_comp_qtd.delete(0, 'end')
-        self.combo_componentes_temp = []
-        self._atualizar_label_componentes()
-
-    def _salvar_combo(self):
-        """Salva o combo no config.json"""
-        nome_combo = self.ent_combo_nome.get().strip().lower()
-
-        if not nome_combo:
-            self.mostrar_toast("Digite o nome do combo!", "error")
-            return
-
-        if not self.combo_componentes_temp:
-            self.mostrar_toast("Adicione pelo menos um componente!", "error")
-            return
-
-        try:
-            with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-
-            if 'combos_estoque' not in config:
-                config['combos_estoque'] = {}
-
-            config['combos_estoque'][nome_combo] = self.combo_componentes_temp.copy()
-
-            with open(ARQUIVO_CONFIG, 'w', encoding='utf-8') as f:
-                json.dump(config, f, indent=4, ensure_ascii=False)
-
-            self.mostrar_toast(f"Combo '{nome_combo}' salvo!", "success")
-            self._limpar_combo()
-            self._carregar_lista_combos()
-
-        except Exception as e:
-            self.mostrar_toast(f"Erro ao salvar: {e}", "error")
-
-    def _carregar_lista_combos(self):
-        """Carrega a lista de combos do config.json"""
-        self.lst_combos.delete(0, tk.END)
-
-        try:
-            with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-
-            combos = config.get('combos_estoque', {})
-            for nome_combo, componentes in combos.items():
-                comp_str = ", ".join([f"{c['qtd']}x {c['nome']}" for c in componentes])
-                self.lst_combos.insert(tk.END, f"🎁 {nome_combo.title()}  →  {comp_str}")
-
-        except Exception:
-            pass
-
-    def _ao_selecionar_combo(self, event):
-        """Ao clicar num combo da lista, carrega para edição"""
-        sel = self.lst_combos.curselection()
-        if not sel:
-            return
-
-        linha = self.lst_combos.get(sel[0])
-        # Extrai o nome do combo (entre 🎁 e →)
-        match = re.search(r'🎁\s*(.+?)\s*→', linha)
-        if match:
-            nome_combo = match.group(1).strip().lower()
-
-            try:
-                with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-
-                componentes = config.get('combos_estoque', {}).get(nome_combo, [])
-
-                self.ent_combo_nome.delete(0, 'end')
-                self.ent_combo_nome.insert(0, nome_combo)
-                self.combo_componentes_temp = componentes.copy()
-                self._atualizar_label_componentes()
-
-            except Exception:
-                pass
-
-    def _excluir_combo(self):
-        """Exclui o combo selecionado"""
-        sel = self.lst_combos.curselection()
-        if not sel:
-            self.mostrar_toast("Selecione um combo!", "error")
-            return
-
-        linha = self.lst_combos.get(sel[0])
-        match = re.search(r'🎁\s*(.+?)\s*→', linha)
-        if not match:
-            return
-
-        nome_combo = match.group(1).strip().lower()
-
-        try:
-            with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-
-            if nome_combo in config.get('combos_estoque', {}):
-                del config['combos_estoque'][nome_combo]
-
-                with open(ARQUIVO_CONFIG, 'w', encoding='utf-8') as f:
-                    json.dump(config, f, indent=4, ensure_ascii=False)
-
-                self.mostrar_toast(f"Combo '{nome_combo}' excluído!", "success")
-                self._carregar_lista_combos()
-                self._limpar_combo()
-
-        except Exception as e:
-            self.mostrar_toast(f"Erro ao excluir: {e}", "error")
 
     # ==================================================================================
     #  SEÇÃO 11: ABA MOTOS
@@ -3910,68 +2542,49 @@ class PainelUltra(ctk.CTk):
         self.after(delay, self._process_ui_queue)
 
     def buscar_robo_no_sistema(self):
+        """Verifica se o robô está rodando. Roda em background para não travar a UI."""
         now = time.time()
-        if now - getattr(self, "_last_robo_check_ts", 0) < 5:
+        if now - getattr(self, "_last_robo_check_ts", 0) < 15:
             return
         self._last_robo_check_ts = now
-        try:
-            cmd = 'wmic process where "name=\'python.exe\'" get commandline'
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, startupinfo=startupinfo)
-            out, _ = proc.communicate()
-            if out and "robo.py" in out:
-                self.robo_rodando = True
-                self.btn_power.configure(text="PARAR OPERAÇÃO", fg_color=COR_CARD_BG, border_color=COR_DANGER, text_color=COR_DANGER, hover_color="#2b1111")
-                self.lbl_status_text.configure(text="SISTEMA ONLINE", text_color=COR_SUCCESS)
-                self.lbl_status_dot.configure(text_color=COR_SUCCESS)
-                self.log_sistema("⚠️ Sessão detectada! Sincronizado.")
+
+        def _check_worker():
+            try:
+                # Se o processo filho ainda está vivo, não precisa escanear
+                if self.processo_robo and self.processo_robo.poll() is None:
+                    return
                 if not self.processo_robo:
-                    self.iniciar_tail_log()
-        except Exception as e:
-            self.log_sistema(f"Erro ao escanear processos: {e}")
+                    self._enqueue_ui(self.iniciar_tail_log)
+            except Exception:
+                pass
+
+        threading.Thread(target=_check_worker, daemon=True).start()
 
     def controlar_janela(self, acao):
-        import ctypes
-        
-        # Códigos nativos do Windows para manipulação de janelas
-        SW_HIDE = 0
-        SW_SHOW = 5
-        SW_RESTORE = 9
-        
         alvos = []
-        
-        # Define o molde da função que o Windows exige para listar as janelas
-        EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
-        
-        def enum_handler(hwnd, lParam):
-            # Se a janela está visível (ou se a ação for forçar a mostrar)
-            if ctypes.windll.user32.IsWindowVisible(hwnd) or acao == "show":
-                tamanho = ctypes.windll.user32.GetWindowTextLengthW(hwnd)
-                if tamanho > 0:
-                    titulo_buffer = ctypes.create_unicode_buffer(tamanho + 1)
-                    ctypes.windll.user32.GetWindowTextW(hwnd, titulo_buffer, tamanho + 1)
-                    title = titulo_buffer.value
-                    
-                    # Procura pelo Chrome, mas ignora se for algo do painel
+        try:
+            def enum_handler(hwnd, results):
+                if win32gui.IsWindowVisible(hwnd):
+                    title = win32gui.GetWindowText(hwnd)
                     if ("Google Chrome" in title or "Chrome" in title) and "DELIVERY" not in title:
-                        alvos.append(hwnd)
-            return True
+                        results.append((hwnd, title))
+                elif acao == "show":
+                    title = win32gui.GetWindowText(hwnd)
+                    if ("Google Chrome" in title or "Chrome" in title) and "DELIVERY" not in title:
+                        results.append((hwnd, title))
 
-        # Manda o Windows listar todas as janelas abertas e passar pelo nosso filtro
-        ctypes.windll.user32.EnumWindows(EnumWindowsProc(enum_handler), 0)
-        
-        if not alvos:
-            self.mostrar_toast("Nenhum Chrome encontrado", "error")
-            return
-            
-        # Aplica a ação nas janelas encontradas
-        for hwnd in alvos:
-            if acao == "hide":
-                ctypes.windll.user32.ShowWindow(hwnd, SW_HIDE)
-            elif acao == "show":
-                ctypes.windll.user32.ShowWindow(hwnd, SW_SHOW)
-                ctypes.windll.user32.ShowWindow(hwnd, SW_RESTORE)
+            win32gui.EnumWindows(enum_handler, alvos)
+            if not alvos:
+                self.mostrar_toast("Nenhum Chrome encontrado", "error")
+                return
+            for hwnd, _ in alvos:
+                if acao == "hide":
+                    win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
+                elif acao == "show":
+                    win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
+                    win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+        except:
+            pass
 
     def toggle_robo(self):
         if not self.robo_rodando:
@@ -4084,35 +2697,39 @@ class PainelUltra(ctk.CTk):
             self.log_tail_running = False
 
     def atualizar_logs_interface(self):
-        # Drena a fila em memória
+        if not self.winfo_exists():
+            return
+
+        # Drena a fila em memória (limita a 50 por vez para não travar UI)
         count = 0
-        max_drain = 100  # Limita quantas linhas processa por vez
-        while not self.fila_logs.empty() and count < max_drain:
+        while not self.fila_logs.empty() and count < 50:
             self._log_buffer.append(self.fila_logs.get())
             count += 1
 
+        # Limita tamanho do buffer (deque com maxlen já descarta automaticamente)
+        if len(self._log_buffer) > 500:
+            for _ in range(len(self._log_buffer) - 500):
+                self._log_buffer.popleft()
+
         # Só renderiza se a aba de logs está ativa
         if self._aba_atual != "logs":
-            # Limita o buffer para não crescer infinitamente
-            if len(self._log_buffer) > 500:
-                # deque não suporta slice, então converte para list e volta para deque
-                self._log_buffer = deque(list(self._log_buffer)[-500:], maxlen=500)
             self.after(LOGS_REFRESH_IDLE_MS, self.atualizar_logs_interface)
             return
 
         # Renderiza apenas se tem conteúdo novo
-        if self._log_buffer:
-            self.txt_logs.configure(state="normal")
-            
-            # Limita o tamanho total do widget de texto (performance)
-            current_lines = int(self.txt_logs.index('end-1c').split('.')[0])
-            if current_lines > 1000:
-                self.txt_logs.delete("1.0", "500.0")  # Remove metade mais antiga
-            
-            self.txt_logs.insert("end", "".join(self._log_buffer))
-            self.txt_logs.see("end")
-            self.txt_logs.configure(state="disabled")
-            self._log_buffer.clear()
+        if self._log_buffer and hasattr(self, 'txt_logs'):
+            try:
+                self.txt_logs.configure(state="normal")
+                # Limita o tamanho total do widget de texto (performance)
+                current_lines = int(self.txt_logs.index('end-1c').split('.')[0])
+                if current_lines > 800:
+                    self.txt_logs.delete("1.0", "400.0")
+                self.txt_logs.insert("end", "".join(self._log_buffer))
+                self.txt_logs.see("end")
+                self.txt_logs.configure(state="disabled")
+                self._log_buffer.clear()
+            except Exception:
+                pass
 
         self.after(LOGS_REFRESH_ACTIVE_MS, self.atualizar_logs_interface)
 
@@ -4131,14 +2748,18 @@ class PainelUltra(ctk.CTk):
         self.fila_logs.put(f"\n{msg}\n")
 
     def carregar_config(self):
+        logger.info(f"Carregando config de: {ARQUIVO_CONFIG}")
         if not os.path.exists(ARQUIVO_CONFIG):
+            logger.warning(f"Arquivo {ARQUIVO_CONFIG} não encontrado, usando config padrão vazia")
             return {"email": "", "senha": "", "motoboys": {}, "bairros": {}, "respostas_bot": {}, "fornecedores": {}}
         try:
             with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
                 config = json.load(f)
+            logger.info(f"✅ Config carregado com sucesso. Chaves: {list(config.keys())}")
             
             # MIGRAÇÃO AUTOMÁTICA: Converte formato antigo para novo
             if "bairros_8" in config or "bairros_11" in config:
+                logger.info("Detectada config antiga, migrando para novo formato...")
                 if "bairros" not in config:
                     config["bairros"] = {}
                 
@@ -4157,20 +2778,24 @@ class PainelUltra(ctk.CTk):
                 print("✅ Bairros migrados para novo formato!")
             
             return config
-        except:
+        except Exception as e:
+            logger.error(f"❌ ERRO ao carregar config: {type(e).__name__}: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
             return {}
 
     def salvar_config(self):
         try:
+            logger.info("Salvando config...")
             with open(ARQUIVO_CONFIG, 'w', encoding='utf-8') as f:
                 json.dump(self.config_data, f, indent=4, ensure_ascii=False)
+            logger.info("✅ Config salvo com sucesso")
+            
             with open(ARQUIVO_COMANDO, 'w', encoding='utf-8') as f:
                 f.write("RECARREGAR_CONFIG")
             self.atualizar_cache_bairros()
         except Exception as e:
-            import traceback
-            print("Erro ao salvar config:")
-            traceback.print_exc()
+            logger.error(f"❌ ERRO ao salvar config: {type(e).__name__}: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
             try:
                 self.mostrar_toast(f"Erro ao salvar config: {e}", "error")
             except Exception:
@@ -4197,19 +2822,29 @@ class PainelUltra(ctk.CTk):
         self.cache_vales_mtime = None
 
     def carregar_excel_cache(self, arq):
+        logger.debug(f"Carregando Excel: {arq}")
         # Lazy-import pandas to avoid startup overhead when GUI opens
         try:
             import pandas as pd
-        except Exception:
+        except Exception as e:
+            logger.error(f"❌ Pandas não disponível: {e}")
             pd = None
 
         try:
             mtime = os.path.getmtime(arq)
-        except OSError:
+            logger.debug(f"Arquivo encontrado, mtime={mtime}")
+        except OSError as e:
+            logger.error(f"❌ Arquivo não encontrado: {arq} - {e}")
             return None, None
 
         if arq == self.cache_excel_path and mtime == self.cache_excel_mtime:
+            logger.debug("Cache válido, retornando dados em cache")
             return self.cache_detalhe_df, self.cache_motos_df
+
+        # Se pandas não estiver disponível, return None
+        if pd is None:
+            logger.warning("Pandas não está disponível, tentando fallback com openpyxl")
+            return None, None
 
         # Carregar apenas colunas necessárias para melhor performance
         cols_detalhe = [
@@ -4218,30 +2853,82 @@ class PainelUltra(ctk.CTk):
         cols_motos = ['MOTOBOY', 'QTD TOTAL', 'QTD R$ 8,00', 'QTD R$ 11,00', 'TOTAL A PAGAR (R$)']
 
         try:
+            logger.info("Carregando aba EXTRATO DETALHADO...")
             df = pd.read_excel(
                 arq, 
                 sheet_name="EXTRATO DETALHADO",
                 usecols=lambda col: any(c in col for c in cols_detalhe) if col else False,
                 dtype={'Numero': str}
             )
-        except Exception:
+            logger.info(f"✅ EXTRATO DETALHADO carregado: {len(df)} linhas")
+        except Exception as e:
+            logger.warning(f"⚠️ Erro ao carregar com seleção de colunas: {e}")
             try:
                 # Fallback: se seleção de colunas falhar, carregar tudo
+                logger.info("Tentando fallback: carregar TUDO...")
                 df = pd.read_excel(arq, sheet_name="EXTRATO DETALHADO")
-            except Exception:
-                df = None
+                logger.info(f"✅ Fallback sucesso: {len(df)} linhas")
+            except Exception as e2:
+                logger.error(f"❌ Pandas falhou completamente: {e2}. Tentando openpyxl...")
+                # Se pandas falhar completamente, tenta openpyxl como último recurso
+                try:
+                    wb = openpyxl.load_workbook(arq)
+                    if "EXTRATO DETALHADO" in wb.sheetnames:
+                        ws = wb["EXTRATO DETALHADO"]
+                        data = []
+                        for row in ws.iter_rows(min_row=2, values_only=True):
+                            if row and row[0]:  # Garante que tem dados
+                                data.append(row)
+                        if data:
+                            df = pd.DataFrame(data, columns=['Hora', 'Numero', 'Cliente', 'Bairro', 'Status', 'Motoboy', 'Valor (R$)'])
+                            logger.info(f"✅ Openpyxl sucesso: {len(data)} linhas")
+                        else:
+                            logger.error("❌ Openpyxl: sem dados")
+                            df = None
+                    else:
+                        logger.error("❌ Aba 'EXTRATO DETALHADO' não encontrada")
+                        df = None
+                except Exception as e3:
+                    logger.error(f"❌ Openpyxl também falhou: {e3}")
+                    df = None
 
         try:
+            logger.info("Carregando aba PAGAMENTO_MOTOBOYS...")
             df_m = pd.read_excel(
                 arq,
                 sheet_name="PAGAMENTO_MOTOBOYS",
                 usecols=lambda col: any(c in col for c in cols_motos) if col else False
             )
-        except Exception:
+            logger.info(f"✅ PAGAMENTO_MOTOBOYS carregado: {len(df_m)} linhas")
+        except Exception as e:
+            logger.warning(f"⚠️ Erro ao carregar PAGAMENTO_MOTOBOYS: {e}")
             try:
+                logger.info("Tentando fallback para PAGAMENTO_MOTOBOYS...")
                 df_m = pd.read_excel(arq, sheet_name="PAGAMENTO_MOTOBOYS")
-            except Exception:
-                df_m = None
+                logger.info(f"✅ Fallback PAGAMENTO_MOTOBOYS sucesso: {len(df_m)} linhas")
+            except Exception as e2:
+                logger.error(f"❌ Pandas falhou para PAGAMENTO_MOTOBOYS: {e2}. Tentando openpyxl...")
+                # Fallback com openpyxl
+                try:
+                    wb = openpyxl.load_workbook(arq)
+                    if "PAGAMENTO_MOTOBOYS" in wb.sheetnames:
+                        ws = wb["PAGAMENTO_MOTOBOYS"]
+                        data = []
+                        for row in ws.iter_rows(min_row=2, values_only=True):
+                            if row and row[0]:  # Garante que tem dados
+                                data.append(row)
+                        if data:
+                            df_m = pd.DataFrame(data, columns=['MOTOBOY', 'QTD TOTAL', 'QTD R$ 8,00', 'QTD R$ 11,00', 'TOTAL A PAGAR (R$)'])
+                            logger.info(f"✅ Openpyxl PAGAMENTO_MOTOBOYS sucesso: {len(data)} linhas")
+                        else:
+                            logger.error("❌ Openpyxl PAGAMENTO_MOTOBOYS: sem dados")
+                            df_m = None
+                    else:
+                        logger.error("❌ Aba 'PAGAMENTO_MOTOBOYS' não encontrada")
+                        df_m = None
+                except Exception as e3:
+                    logger.error(f"❌ Openpyxl também falhou para PAGAMENTO_MOTOBOYS: {e3}")
+                    df_m = None
 
         self.cache_excel_path = arq
         self.cache_excel_mtime = mtime
@@ -4694,22 +3381,6 @@ class PainelUltra(ctk.CTk):
                 self.combo_fornecedor.set(novo_fornecedor)
                 self.mostrar_toast(f"Fornecedor '{novo_fornecedor}' adicionado!", "success")
 
-    def _atualizar_combo_fornecedores_filtro(self, _=None):
-        """Atualiza a lista de fornecedores no combobox de filtro"""
-        fornecedores_config = list(self.config_data.get("fornecedores", {}).keys())
-        fornecedores_estoque = list(set(item.get("fornecedor", "-") for item in self.estoque_data if item.get("fornecedor")))
-        todos = sorted(list(set(fornecedores_config + fornecedores_estoque)))
-        
-        if todos:
-            self.combo_filtro_fornecedor.configure(values=["Todos os Fornecedores"] + todos)
-        else:
-            self.combo_filtro_fornecedor.configure(values=["Todos os Fornecedores", "-"])
-
-    def _aplicar_filtros_estoque(self, _=None):
-        """Acionado quando muda categoria ou fornecedor nos filtros"""
-        cat = self.combo_filtro_categoria.get()
-        forn = self.combo_filtro_fornecedor.get()
-        self.atualizar_tabela_estoque(filtro=self.ent_busca.get(), filtro_categoria=cat, filtro_fornecedor=forn)
 
     def filtrar_tabela_busca(self, _):
         termo = self.ent_busca.get().lower()
@@ -4740,7 +3411,19 @@ class PainelUltra(ctk.CTk):
         if not os.path.exists(arq): return
         try:
             import pandas as pd
+        except Exception:
+            pd = None
+        
+        try:
             import openpyxl
+        except Exception:
+            openpyxl = None
+        
+        if pd is None or openpyxl is None:
+            self.mostrar_toast("Pandas ou openpyxl não instalado.", "error")
+            return
+        
+        try:
             df = pd.read_excel(arq, sheet_name="EXTRATO DETALHADO")
             df['Numero'] = df['Numero'].astype(str)
             index = df.index[df['Numero'] == str(numero_pedido)].tolist()
@@ -4829,13 +3512,6 @@ class PainelUltra(ctk.CTk):
         except Exception as e:
             self.mostrar_toast(f"Erro: {e}", "error")
 
-    def atualizar_estoque_manual(self):
-        try:
-            with open(ARQUIVO_COMANDO, 'w', encoding='utf-8') as f:
-                f.write("ATUALIZAR_ESTOQUE")
-            self.mostrar_toast("Atualizando estoque...", "info")
-        except Exception as e:
-            self.mostrar_toast(f"Erro: {e}", "error")
 
     def enviar_print(self):
         t = self.ent_busca.get().strip()
@@ -4846,222 +3522,11 @@ class PainelUltra(ctk.CTk):
             self.mostrar_toast(f"Imprimindo: {t}", "success")
 
     # ==================================================================================
-    #  ALERTAS DE ATRASO (CONFIRMAÇÃO MANUAL)
-    # ==================================================================================
-    
-    def carregar_alertas_atraso(self):
-        """Carrega alertas pendentes e exibe na interface"""
-        try:
-            # Segurança: se a aba de vales ainda não foi inicializada, nada a fazer
-            if not hasattr(self, 'fr_alertas_atraso'):
-                return
-            # Debounce: evita recarregar muito rápido
-            now = time.time()
-            if hasattr(self, '_last_alertas_load') and now - self._last_alertas_load < 2:
-                return  # Ignora se carregou há menos de 2s
-            self._last_alertas_load = now
-            
-            if not os.path.exists(ARQUIVO_ALERTAS):
-                self.fr_alertas_atraso.grid_remove()
-                return
-            
-            # Verifica se o arquivo mudou antes de recarregar
-            try:
-                mtime = os.path.getmtime(ARQUIVO_ALERTAS)
-                if hasattr(self, '_alertas_mtime') and mtime == self._alertas_mtime:
-                    return  # Arquivo não mudou
-                self._alertas_mtime = mtime
-            except OSError:
-                return
-            
-            with open(ARQUIVO_ALERTAS, 'r', encoding='utf-8') as f:
-                alertas = json.load(f)
-            
-            # Filtra apenas alertas de 9min55s ou mais (≥ 595 segundos)
-            alertas_filtrados = []
-            for alerta in alertas:
-                tempo_total_s = int(alerta.get("tempo_minutos", 0)) * 60 + int(alerta.get("tempo_segundos", 0))
-                if tempo_total_s >= 595:  # 9min55s ou mais
-                    alertas_filtrados.append(alerta)
-            
-            if not alertas_filtrados:
-                self.fr_alertas_atraso.grid_remove()
-                return
-            
-            # Limpa alertas antigos da interface
-            for widget in self.fr_alertas_atraso.winfo_children():
-                widget.destroy()
-            
-            # Mostra o frame de alertas
-            self.fr_alertas_atraso.grid()
-            self.fr_alertas_atraso.configure(height=120 * min(len(alertas_filtrados), 3))  # Max 3 visíveis
-            
-            # Header
-            ctk.CTkLabel(
-                self.fr_alertas_atraso, 
-                text="⚠️ Retirou com 9+ min - CONFIRME PARA ENVIAR",
-                font=FONT_BOLD, 
-                text_color=COR_DANGER
-            ).pack(pady=(10, 5))
-            
-            # Card para cada alerta filtrado
-            for alerta in alertas_filtrados:
-                self._criar_card_alerta(alerta)
-            
-        except Exception as e:
-            print(f"Erro ao carregar alertas: {e}")
-    
-    def _criar_card_alerta(self, alerta):
-        """Cria um card para um alerta específico"""
-        tempo_total_s = int(alerta.get("tempo_minutos", 0)) * 60 + int(alerta.get("tempo_segundos", 0))
-        destaque_critico = tempo_total_s >= 570  # 9min30s
-        cor_borda = COR_DANGER if destaque_critico else COR_DANGER
-        cor_fundo = "#1a0f12" if destaque_critico else COR_BG_APP
-        fr_alerta = ctk.CTkFrame(self.fr_alertas_atraso, fg_color=cor_fundo, corner_radius=8, border_width=1, border_color=cor_borda)
-        fr_alerta.pack(fill="x", padx=10, pady=5)
+       
         
-        # Info principal
-        fr_info = ctk.CTkFrame(fr_alerta, fg_color="transparent")
-        fr_info.pack(side="left", fill="both", expand=True, padx=15, pady=10)
-        
-        # Pedido e cliente + selo
-        fr_titulo = ctk.CTkFrame(fr_info, fg_color="transparent")
-        fr_titulo.pack(anchor="w")
-        ctk.CTkLabel(
-            fr_titulo,
-            text=f"#{alerta['numero']} - {alerta['cliente']}",
-            font=("Roboto Bold", 14),
-            text_color=COR_DANGER if destaque_critico else "white"
-        ).pack(side="left")
 
-        if destaque_critico:
-            ctk.CTkLabel(
-                fr_titulo,
-                text="9,5+",
-                font=("Roboto Bold", 11),
-                text_color=COR_DANGER,
-                fg_color="#2b1111",
-                corner_radius=6,
-                padx=6,
-                pady=2
-            ).pack(side="left", padx=(8, 0))
-        
-        # Tempo e motoboy
-        # tipo_alerta = alerta.get("tipo", "atraso")  # unused variable removed
-        tempo_txt = f"{alerta['tempo_minutos']}min {alerta['tempo_segundos']}s"
-        info_txt = f"⏱️ Retirou com: {tempo_txt} | 🏍️ {alerta['motoboy']} | "
-        info_txt += f"👥 {alerta['motoboys_livres']} livres / {alerta['motoboys_ocupados']} ocupados"
-        
-        ctk.CTkLabel(
-            fr_info,
-            text=info_txt,
-            font=("Roboto", 11),
-            text_color=COR_TEXT_SEC
-        ).pack(anchor="w", pady=(2, 0))
-        
-        # Horários
-        ctk.CTkLabel(
-            fr_info,
-            text=f"🕐 Pedido: {alerta['hora_aceito']} | Retirado: {alerta['timestamp']}",
-            font=("Roboto", 10),
-            text_color=COR_TEXT_SEC
-        ).pack(anchor="w", pady=(2, 0))
-        
-        # Botões
-        fr_btns = ctk.CTkFrame(fr_alerta, fg_color="transparent")
-        fr_btns.pack(side="right", padx=10, pady=10)
-        
-        ctk.CTkButton(
-            fr_btns,
-            text="✅ ENVIAR",
-            width=100,
-            command=lambda a=alerta: self.enviar_alerta_atraso(a),
-            fg_color=COR_SUCCESS,
-            text_color="#003300",
-            hover_color="#00A652"
-        ).pack(side="left", padx=5)
-        
-        ctk.CTkButton(
-            fr_btns,
-            text="❌ IGNORAR",
-            width=100,
-            command=lambda a=alerta: self.descartar_alerta(a),
-            fg_color="transparent",
-            border_width=1,
-            border_color=COR_DANGER,
-            text_color=COR_DANGER,
-            hover_color="#2b1111"
-        ).pack(side="left", padx=5)
     
-    def enviar_alerta_atraso(self, alerta):
-        """Confirma e envia o alerta para o WhatsApp via robô"""
-        try:
-            # Verifica se a menção está ativa
-            mencao_ativa = self.config_data.get("whatsapp_mencao_ativa", False)
-            mencao_txt = "@+55 49 9172-7951 " if mencao_ativa else ""
-            
-            # Monta mensagem formatada
-            msg = (
-                f"{mencao_txt}⚠️ Pedido: {alerta['numero']}\n"
-                f"👤 *{alerta['cliente']}*\n"
-                f"🏍️ Motoboy: {alerta['motoboy']}\n"
-                f"⏱️ Retirou com: {alerta['tempo_minutos']}min {alerta['tempo_segundos']}s\n"
-                f"🕐 Aceito: {alerta['hora_aceito']} | Saida: {alerta['timestamp']}"
-            )
-            
-            # Envia comando para o robô enviar no WhatsApp
-            with open(ARQUIVO_COMANDO, 'w', encoding='utf-8') as f:
-                f.write(f"ENVIAR_WHATSAPP:{msg}")
-            
-            # Remove da lista
-            self._remover_alerta_do_arquivo(alerta)
-            
-            self.mostrar_toast(f"Alerta #{alerta['numero']} enviado!", "success")
-            
-            # Recarrega interface
-            self.after(100, self.carregar_alertas_atraso)
-            
-        except Exception as e:
-            self.mostrar_toast(f"Erro: {e}", "error")
-    
-    def descartar_alerta(self, alerta):
-        """Descarta o alerta sem enviar"""
-        try:
-            self._remover_alerta_do_arquivo(alerta)
-            self.mostrar_toast(f"Alerta #{alerta['numero']} descartado", "info")
-            self.after(100, self.carregar_alertas_atraso)
-        except Exception as e:
-            self.mostrar_toast(f"Erro: {e}", "error")
-    
-    def _remover_alerta_do_arquivo(self, alerta_remover):
-        """Remove um alerta específico do arquivo JSON"""
-        try:
-            alertas = []
-            if os.path.exists(ARQUIVO_ALERTAS):
-                with open(ARQUIVO_ALERTAS, 'r', encoding='utf-8') as f:
-                    alertas = json.load(f)
-            
-            # Filtra removendo o alerta específico
-            alertas = [a for a in alertas if a['numero'] != alerta_remover['numero']]
-            
-            # Salva de volta
-            with open(ARQUIVO_ALERTAS, 'w', encoding='utf-8') as f:
-                json.dump(alertas, f, indent=2, ensure_ascii=False)
-                
-        except Exception as e:
-            print(f"Erro ao remover alerta: {e}")
-
-    def dispensar_todos_alertas(self):
-        """Remove todos os alertas de atraso do arquivo e da interface."""
-        try:
-            if os.path.exists(ARQUIVO_ALERTAS):
-                with open(ARQUIVO_ALERTAS, 'w', encoding='utf-8') as f:
-                    json.dump([], f, indent=2, ensure_ascii=False)
-            self.fr_alertas_atraso.grid_remove()
-            self.mostrar_toast("Todos os avisos foram dispensados!", "success")
-        except Exception as e:
-            self.mostrar_toast(f"Erro ao dispensar avisos: {e}", "error")
-
+   
 # ==================================================================================
 #  SEÇÃO 14: INICIALIZAÇÃO DO PAINEL (MAIN LOOP)
 # ==================================================================================

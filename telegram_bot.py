@@ -614,8 +614,15 @@ async def imprimir_command(update: Update, context: CallbackContext):
 async def garantia_command(update: Update, context: CallbackContext):
     """Handler para o comando /garantia."""
     if len(context.args) < 3:
-        await update.message.reply_text("Uso: /garantia <Nome> <Início> <Fim>")
-        return
+        await update.message.reply_text("Uso: /garantia <Nome> <Início> <Fim>\nExemplo: /garantia jean dutra 18:00 02:00")
+        return  # <-- Esta linha DEVE estar alinhada com o 'await' acima.
+    fim = context.args[-1]
+    inicio = context.args[-2]
+    nome = " ".join(context.args[:-2])
+    
+    response = send_panel_command(f"GERAR_GARANTIA:{nome}|{inicio}|{fim}")
+    await update.message.reply_text(response)
+    return
     nome, inicio, fim = context.args[0], context.args[1], context.args[2]
     response = send_panel_command(f"GERAR_GARANTIA:{nome}|{inicio}|{fim}")
     await update.message.reply_text(response)
@@ -624,11 +631,11 @@ async def enviar_command(update: Update, context: CallbackContext):
     """Handler para o comando /enviar."""
     if not context.args:
         await update.message.reply_text("Uso: /enviar <Mensagem>")
-        return
+    return
     mensagem = " ".join(context.args)
     response = send_panel_command(f"ENVIAR_MENSAGEM:{mensagem}")
     await update.message.reply_text(response)
-
+    
 async def alerta_auto_command(update: Update, context: CallbackContext):
     """Handler para o comando /alerta_auto."""
     response = send_panel_command("TOGGLE_ALERTA_AUTO")
@@ -1124,6 +1131,13 @@ def load_config():
     """Carrega as configurações do JSON."""
     global TELEGRAM_TOKEN, ADMIN_CHAT_ID
     try:
+        # Adicionar depuração aqui
+        base_path = get_caminho_base()
+        config_file_path = os.path.join(base_path, ARQUIVO_CONFIG)
+        print(f"[DEBUG] Caminho base do bot: {base_path}")
+        print(f"[DEBUG] Procurando config.json em: {config_file_path}")
+        print(f"[DEBUG] config.json existe? {os.path.exists(config_file_path)}")
+        
         with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
             config = json.load(f)
         TELEGRAM_TOKEN = config.get('telegram_token')
@@ -1309,10 +1323,12 @@ def main():
     print("✅ Bot de controle pronto para receber comandos.")
     print("🚀 Iniciando polling do Telegram...")
     
-    # Aguardar limpeza de updates antigos
+# Aguardar limpeza de updates antigos
     import asyncio
     try:
-        asyncio.run(limpar_updates_antigos(application.bot))
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(limpar_updates_antigos(application.bot))
     except Exception as e:
         print(f"⚠️ Erro ao limpar updates antigos: {e}")
     

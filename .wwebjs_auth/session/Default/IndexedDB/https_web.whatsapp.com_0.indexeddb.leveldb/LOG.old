@@ -1,0 +1,25 @@
+2026/03/21-16:18:16.554 31b8 Reusing MANIFEST C:\Users\Usuario\Desktop\githubnew\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/03/21-16:18:16.555 31b8 Recovering log #24
+2026/03/21-16:18:16.604 31b8 Reusing old log C:\Users\Usuario\Desktop\githubnew\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000024.log 
+2026/03/21-16:18:27.083 6204 Level-0 table #30: started
+2026/03/21-16:18:27.121 6204 Level-0 table #30: 1121801 bytes OK
+2026/03/21-16:18:27.123 6204 Delete type=0 #24
+2026/03/21-16:18:27.203 2c24 Compacting 1@1 + 2@2 files
+2026/03/21-16:18:27.330 2c24 Generated table #31@1: 45130 keys, 2207707 bytes
+2026/03/21-16:18:27.400 2c24 Generated table #32@1: 28116 keys, 1275052 bytes
+2026/03/21-16:18:27.401 2c24 Compacted 1@1 + 2@2 files => 3482759 bytes
+2026/03/21-16:18:27.401 2c24 compacted to: files[ 0 0 2 0 0 0 0 ]
+2026/03/21-16:18:27.402 2c24 Delete type=2 #26
+2026/03/21-16:18:27.403 2c24 Delete type=2 #27
+2026/03/21-16:18:27.403 2c24 Delete type=2 #30
+2026/03/21-16:34:57.342 2c24 Level-0 table #34: started
+2026/03/21-16:34:57.424 2c24 Level-0 table #34: 1095422 bytes OK
+2026/03/21-16:34:57.434 2c24 Delete type=0 #29
+2026/03/21-16:34:57.719 6204 Compacting 1@1 + 2@2 files
+2026/03/21-16:34:57.857 6204 Generated table #35@1: 44093 keys, 2214901 bytes
+2026/03/21-16:34:57.922 6204 Generated table #36@1: 29891 keys, 1358650 bytes
+2026/03/21-16:34:57.923 6204 Compacted 1@1 + 2@2 files => 3573551 bytes
+2026/03/21-16:34:57.923 6204 compacted to: files[ 0 0 2 0 0 0 0 ]
+2026/03/21-16:34:57.925 6204 Delete type=2 #31
+2026/03/21-16:34:57.925 6204 Delete type=2 #32
+2026/03/21-16:34:57.925 6204 Delete type=2 #34

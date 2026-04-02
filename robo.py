@@ -1,6 +1,21 @@
+import warnings
+warnings.filterwarnings("ignore", message="urllib3", category=Warning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 import difflib
 import requests
-from curl_cffi import requests as cffi_requests
+# Truque para ignorar o curl-cffi e usar o requests normal
+import requests
+class CFFIFake:
+    @staticmethod
+    def post(*args, **kwargs):
+        if 'impersonate' in kwargs: del kwargs['impersonate']
+        return requests.post(*args, **kwargs)
+    @staticmethod
+    def get(*args, **kwargs):
+        if 'impersonate' in kwargs: del kwargs['impersonate']
+        return requests.get(*args, **kwargs)
+cffi_requests = CFFIFake()
 import sys
 import os
 import openpyxl
@@ -28,6 +43,9 @@ class TeeStream(io.TextIOBase):
         for stream in self.streams:
             try:
                 stream.write(s)
+                # Adicione estas duas linhas abaixo:
+                if hasattr(stream, "flush"):
+                    stream.flush()
             except Exception:
                 pass
         return len(s)
@@ -517,8 +535,8 @@ def telegram_polling():
 # Inicia polling do Telegram em thread separada (FORA DA FUNÇÃO, encostado na esquerda)
 # Certifique-se de que essa parte NÃO tem o símbolo "#" na frente do if e do threading
 # ==================================================================================
-if TELEGRAM_TOKEN:
-    threading.Thread(target=telegram_polling, daemon=True).start()
+#if TELEGRAM_TOKEN:
+ #threading.Thread(target=telegram_polling, daemon=True).start()
 # ==================================================================================
 #  SEÇÃO 3: TELEGRAM BOT - INICIALIZAÇÃO
 # ==================================================================================
@@ -3754,9 +3772,30 @@ def processar_comando_telegram():
         # --- BLOCO CORRIGIDO: IMPRESSÃO DE GARANTIA ---
         elif cmd.startswith('GERAR_GARANTIA:') or cmd.startswith('IMPRIMIR_GARANTIA:'):
             dados = cmd.split(':', 1)[1]
-            print(f"\n🖨️ COMANDO RECEBIDO: Recibo de Garantia")
-            imprimir_recibo_garantia(dados)
-            enviar_telegram("✅ Recibo de garantia impresso com sucesso!")
+            partes = dados.split('|')
+            
+            # Se vier do Telegram (/garantia), virão só 3 partes (Nome, Início, Fim)
+            if len(partes) == 3:
+                nome_alvo, hora_ini, hora_fim = partes
+                data_str = datetime.now().strftime('%d-%m-%Y')
+                
+                enviar_telegram(f"🖨️ *Calculando garantia...*\nMotoboy: {nome_alvo.upper()}\nTurno: {hora_ini} às {hora_fim}")
+                
+                # Usamos a mesma função do painel que calcula tudo automaticamente!
+                sucesso = imprimir_extrato_por_nome(nome_alvo, data_str, hora_ini=hora_ini, hora_fim=hora_fim)
+                
+                if sucesso:
+                    enviar_telegram("✅ Extrato com garantia impresso com sucesso!")
+                else:
+                    enviar_telegram(f"⚠️ Não achei corridas para '{nome_alvo}' hoje.")
+            
+            # Mantém a estrutura original caso o painel envie o formato longo
+            elif len(partes) >= 8:
+                print(f"\n🖨️ COMANDO RECEBIDO: Recibo de Garantia (Painel)")
+                imprimir_recibo_garantia(dados)
+                enviar_telegram("✅ Recibo de garantia impresso com sucesso!")
+            else:
+                enviar_telegram("⚠️ Erro: Dados de garantia incompletos.")
 
         elif cmd == 'TOGGLE_ALERTA_AUTO':
             novo = not CONFIG.get('alerta_retirada_auto', False)

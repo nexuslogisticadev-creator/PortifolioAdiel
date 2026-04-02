@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
 SET SCRIPT_DIR=%~dp0
-SET BOT_NAME=TelegramBotService
-SET PYTHON_EXE=%~dp0\.venv314\Scripts\python.exe
+SET BOT_NAME=TelegramBotService22
+SET PYTHON_EXE=%~dp0telegram_bot_env\Scripts\pythonw.exe
 SET BOT_SCRIPT=%SCRIPT_DIR%telegram_bot.py
-SET NSSM_DIR=%SCRIPT_DIR%nssm
+SET NSSM_DIR=%SCRIPT_DIR%nssm-2.24
 SET NSSM_EXE=%NSSM_DIR%\win64\nssm.exe
 
 echo.
