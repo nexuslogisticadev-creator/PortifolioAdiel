@@ -1,38 +1,41 @@
-# Python
+# --- Python & Bytecode ---
 __pycache__/
 *.pyc
 *.pyo
-*.txt
-*.spec
-*.lnk
-*.pdf
 *.pyd
-teste_novo/
-# Virtual environments
+*.spec
+build/
+dist/
+
+# --- Virtual Environments ---
 .venv/
 venv/
-.txt
-.csv
-.xlsx
-.pdf
+env/
 
-# Local data and secrets
+# --- Arquivos de Saída e Documentos (Gerais) ---
+*.pdf
+*.lnk
+*.exe
+*.xlsx
+*.csv
+# *.txt  <-- CUIDADO: Se comentar isso, os logs voltam a aparecer. 
+# Se quiser ignorar só a pasta de logs, use: logs/*.txt
+
+# --- Local Data and Secrets ---
 Controle_Financeiro_*.xlsx
 *.log
-*.json
+# *.json <-- RECOMENDAÇÃO: Remova ou seja específico (ex: config_privada.json)
+# O Git precisa do package.json e tsconfig.json para o projeto rodar.
 
-# Local profiles and builds
+# --- Browser Profiles & OS ---
 perfil_chrome/
 perfil_firefox/
-build/
-
-# OS
 .DS_Store
 Thumbs.db
-dist/
-dist/
-*.exe
-node_modules
-monitor-pedidos/teste_novo
-monitor-pedidos/teste_novo
-monitor-pedidos/teste_novo
+
+# --- Node.js ---
+node_modules/
+
+# --- Pastas Específicas do Projeto ---
+teste_novo/
+monitor-pedidos/teste_novo/
