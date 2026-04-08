@@ -33,3 +33,4 @@ dist/
 dist/
 *.exe
 node_modules
+monitor-pedidos/teste_novo
