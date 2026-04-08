@@ -7,6 +7,10 @@ __pycache__/
 # Virtual environments
 .venv/
 venv/
+.txt
+.csv
+.xlsx
+.pdf
 
 # Local data and secrets
 Controle_Financeiro_*.xlsx
