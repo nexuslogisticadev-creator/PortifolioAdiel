@@ -11,6 +11,8 @@ dist/
 .venv/
 venv/
 env/
+gen-lang-client-*.json
+serviceAccountKey.json
 
 # --- Arquivos de Saída e Documentos (Gerais) ---
 *.pdf
