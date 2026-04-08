@@ -26,7 +26,11 @@ logs/*.txt
 # --- Local Data and Secrets ---
 Controle_Financeiro_*.xlsx
 *.log
-*.json <-- RECOMENDAÇÃO: Remova ou seja específico (ex: config_privada.json)
+*.json
+config.json
+estoque.json
+.txt
+*.txt
 # O Git precisa do package.json e tsconfig.json para o projeto rodar.
 
 # --- Browser Profiles & OS ---
