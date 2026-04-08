@@ -1,0 +1,396 @@
+{
+    "grupo_whatsapp": "Zé Número cliente",
+    "nome_grupo": "Zé Número cliente",
+    "email": "charlestelebierze@gmail.com",
+    "senha": "Cha310103",
+    "telegram_token": "8121058711:AAHv12SpqfdhpSNDu79KOkYalCBHyZwElv0",
+    "telegram_chat_id": "6376198219,6764283732",
+    "debug_alerta_retirada_todos": true,
+    "alerta_retirada_auto": true,
+    "path_backup": "C:/Users/Usuario/OneDrive",
+    "bairros": {
+        "pinheirinho": 8.0,
+        "centro": 8.0,
+        "passo dos fortes": 8.0,
+        "santa maria": 8.0,
+        "presidente medici": 8.0,
+        "presidente médice": 8.0,
+        "presidente medice": 8.0,
+        "jardim italia": 8.0,
+        "maria goreti": 8.0,
+        "maria goretti": 8.0,
+        "sao pedro": 8.0,
+        "paraiso": 8.0,
+        "sao cristovao": 8.0,
+        "bom pastor": 8.0,
+        "alvorada": 11.0,
+        "cristo rei": 11.0,
+        "monte belo": 11.0,
+        "desbravador": 11.0,
+        "saic": 11.0,
+        "esplanada": 11.0,
+        "santa paulina": 11.0,
+        "sao roque": 11.0,
+        "jardins": 11.0,
+        "jardim america": 11.0,
+        "palmital": 11.0,
+        "quedas do palmital": 11.0,
+        "lider": 11.0,
+        "universitario": 11.0,
+        "santo antonio": 11.0,
+        "sao lucas": 11.0,
+        "boa vista": 11.0,
+        "seminario": 11.0,
+        "vila real": 11.0,
+        "villa real": 11.0,
+        "bela vista": 11.0,
+        "efapi": 11.0,
+        "trevo": 11.0,
+        "engenho": 11.0,
+        "eldorado": 11.0,
+        "vila roman": 11.0,
+        "roman": 11.0,
+        "bom retiro": 11.0,
+        "dom pascoal": 11.0,
+        "jardim europa": 11.0
+    },
+    "motoboys": {
+        "jeanlorenzo496@gmail.com": "JEAN DUTRA",
+        "eliasmendesilva27.04@gmail.com": "Elias Mendes",
+        "assuncaot671@gmail.com": "Tiago",
+        "marcosdioginyss51@gmail.com": "Marcos",
+        "emiliomartinez27144@gmail.com": "Emilio",
+        "rondonalejandro632@gmail.com": "Randon",
+        "ag530759222@gmail.com": "Alejandro",
+        "rafaelneressilva37@gmail.com": "Rafael",
+        "emiliovicente58@gmail.com": "Vicente",
+        "ajlujanozapata@gmail.com": "Angel Lujano",
+        "keimersonguzman2@gmail.co": "Keimerson",
+        "arcilagolindanod@gmail.com": "Jose",
+        "adalbertomoraes795@gmail.com": "Adalberto",
+        "glujanogil@gmail.com": "Gustavo",
+        "gleidsonrogena@gmail.com": "Gledson",
+        "euclidescarvajal@gmail.com": "Euclides",
+        "marloscorreasarges164@gmail.com": "Marlos",
+        "ianmarcano74@gmail.com": "Adrian",
+        "alexanderroydin@gmail.com": "Roy",
+        "evanildonunesvieira@gmail.com": "Evanildo",
+        "srdeath256@gmail.com": "JOEL",
+        "eduardopaivasilva1998@gmail.com": "Eduardo Silva",
+        "kalysonsampaiosampaio@gmail.com": "Kailan ",
+        "keimersonguzman2@gmail.com": "Keimerson",
+        "izadora08092020@gmail.com": "Paulo",
+        "luisdanielcalzadillatrinitario@gmail.com": "Luis Daniel",
+        "luisyjeannysteamo@gmail.com": "Luiz +55 49 8876-5895"
+    },
+    "pix_motoboys": {
+        "Jean": "c85868e3-2801-45bc-97cf-a1038fae14a4",
+        "Jean Dutra": "c85868e3-2801-45bc-97cf-a1038fae14a4",
+        "Elias": "98983155983",
+        "Elias Mendes": "98983155983",
+        "Tiago": "96991943803",
+        "Marcos": "62216560367",
+        "Emilio": "49999027201",
+        "Emiliomartinez27144": "49999027201",
+        "Randon": "70870886290",
+        "Rondon": "70870886290",
+        "Alejandro": "71322717176",
+        "Rafael": "61605657379",
+        "Vicente": "70801804221",
+        "Angel Lujano": "6e7542e2-7db3-4a19-b541-7f6e52d94830",
+        "Ajlujanozapata": "6e7542e2-7db3-4a19-b541-7f6e52d94830",
+        "Keimerson": "71047080222",
+        "Jose": "71294176250",
+        "Adalberto": "08886932308",
+        "Gustavo": "Lujanogustavo68@gmail.com",
+        "Gledson": "00754998274",
+        "Euclides": "euclidescarvajal@gmail.com",
+        "Marlos": "01967844259",
+        "Adrian": "ianmarcano74@gmail.com",
+        "Roy": "11010446240",
+        "Evanildo": "evanildonunesvieira@gmail.com",
+        "Giannecker2020": "13134448980",
+        "Marcosdioginys51": "62216560367",
+        "Wesleeymendes29": "04139859032",
+        "Luisdanielcalzadillatrinitario": "49991552044",
+        "Euclidescarvajal": "euclidescarvajal@gmail.com",
+        "Ajsdavid05": "70621872245",
+        "Angeljesusgonzalez39": "47997684489",
+        "Gleidsonmorena": "754998274",
+        "ailton": "49999745611",
+        "Keimersonguzman2": "71047080222",
+        "Jeangd20": "11282934201",
+        "natanaelv534": "06434375336",
+        "Kalysonsampaiosampaio": "98985757859",
+        "Eduardo Silva": "075.218.663-98",
+        "srdeath256@gmail.com": "70929775252",
+        "JOEL": "70929775252",
+        "Izadora08092020": "izadora08092020@gmail.com",
+        "Kailan": "98985757859",
+        "Nunesdoulas2018": "10912786957",
+        "Lianrivero2025": "49999030317",
+        "Paulo": "izadora08092020@gmail.com",
+        "Luisyjeannysteamo": "49988898107",
+        "Luiz +55 49 8876-5895": "49988898107",
+        "Armasroae": "71279832240",
+        "Andryrivas622": "95981243002",
+        "Mirandachapeco1987": "49 999104574",
+        "Luis Daniel": "49991552044",
+        "Liomeradrian": "49 9 99639761",
+        "Heitorhenriquek2": "06244889002",
+        "Thailsonp835": "61880796325",
+        "Adieldie": "adieldie@gmail.com",
+        "Jesusroideld": "49988725873",
+        "Luizeduardosacardo": "49988762943",
+        "Syliojean9": "49999487623"
+    },
+    "google_sheets": {
+        "sheets_id": "1vPjAu-5udf4G1iaRQDucGrlSBn1JspN0XUhRVRPcB0w",
+        "service_account_json": "C:\\Users\\Usuario\\Desktop\\githubnew\\gen-lang-client-0592009269-3d0b6d104f80.json"
+    },
+    "chrome_user_data_dir": "C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\User Data",
+    "chrome_profile_directory": "Default",
+    "whatsapp_mencao_ativa": true,
+    "url_api": "https://seller-api.ze.delivery/graphql",
+    "compras_ignore_list": "Antarctica Pilsen 300Ml | Vasilhame Incluso, Antarctica Pilsen 350Ml - Pack Econômico (18 Unidades), Antarctica Pilsen 600Ml | Vasilhame Incluso,   Beats Senses 269Ml, 8 Unidades De Corona Extra 330Ml + 1 Sacooler, 8 Unidades De Corona Extra 330Ml + 1 Sacooler, , Beats Tropical 269Ml, Brahma 300Ml | Vasilhame Incluso,  Brahma 350Ml - Pack Econômico (12 Unidades), Brahma 350Ml - Pack Econômico (18 Unidades), Brahma 600Ml | Vasilhame Incluso, Brahma Duplo Malte 300Ml | Apenas O Líquido, Brahma Zero 355Ml, Budweiser 300Ml | Vasilhame Incluso, Budweiser 600Ml | Vasilhame Incluso, Cerveja Corona Extra 330Ml, Chiclete Trident Tutti-Frutti Embalagem Econômica 25G, Corona Cero Sunbrew 330Ml, Gatorade Berry Blue, Gatorade Limão 500Ml, Gatorade Maracujá 500Ml, Guaraná Antarctica 2L, Guaraná Antarctica 600Ml, Meio Gelo, Original 300Ml | Vasilhame Incluso, Original 350Ml - Pack Econômico (12 Unidades), Original 600Ml | Vasilhame Incluso, Patagonia Weisse 355Ml, Pepsi 2L, Red Bull Energy Drink 250Ml, Serramalte 600Ml | Vasilhame Incluso, Skol 300Ml | Vasilhame Incluso, Skol 350Ml - Pack Econômico (12 Unidades), Skol 350Ml - Pack Econômico (18 Unidades), Skol 600Ml | Vasilhame Incluso, Soda Antarctica 350Ml, Spaten 600Ml | Vasilhame Incluso, Stella Pure Gold 350Ml, Trident Hortelã 8G, Tequila José Cuervo Especial Prata 750Ml, Sacooler Com Gelo ",
+    "protecao": {
+        "limite_requisicoes_dia": 3000,
+        "refresh_interval_1": 7200,
+        "refresh_interval_2": 1200,
+        "chrome_restart_cooldown": 300
+    },
+    "headers_api": {
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Content-Type": "application/json",
+        "Origin": "https://parceiros.ze.delivery",
+        "Referer": "https://parceiros.ze.delivery/",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site"
+    },
+    "api_request": {
+        "impersonate": "chrome120",
+        "timeout_min": 12,
+        "timeout_max": 18,
+        "cookie_token_key": "seu_ze_access_token"
+    },
+    "url_principal": "https://seu.ze.delivery/",
+    "categorias_produtos": {
+        "🍺 CERVEJAS": [
+            "skol",
+            "brahma",
+            "antarctica",
+            "budweiser",
+            "heineken",
+            "spaten",
+            "corona",
+            "original",
+            "bohemia",
+            "polar",
+            "subzero",
+            "serrana",
+            "bavaria",
+            "kaiser",
+            "proibida",
+            "becks",
+            "stella",
+            "eisenbahn",
+            "michelob"
+        ],
+        "🍸 DESTILADOS": [
+            "vodka",
+            "whisky",
+            "gin",
+            "cachaça",
+            "rum",
+            "tequila",
+            "licor",
+            "campari",
+            "aperol",
+            "velho barreiro",
+            "51",
+            "smirnoff",
+            "absolut",
+            "jack",
+            "red label",
+            "white horse",
+            "passport",
+            "ballantines",
+            "chivas",
+            "conhaque",
+            "dreher",
+            "sakerita",
+            "old parr",
+            "montilla",
+            "malibu"
+        ],
+        "🥤 NÃO ALCOÓLICOS": [
+            "coca",
+            "pepsi",
+            "fanta",
+            "guaraná",
+            "sprite",
+            "sukita",
+            "soda",
+            "agua",
+            "água",
+            "h2oh",
+            "gatorade",
+            "suco",
+            "del valle",
+            "tonica",
+            "refrigerante"
+        ],
+        "⚡ ENERGÉTICOS": [
+            "red bull",
+            "monster",
+            "baly",
+            "vibe",
+            "tnt"
+        ],
+        "🍷 VINHOS & ICES": [
+            "vinho",
+            "cantina",
+            "pergola",
+            "pérgola",
+            "sangue de boi",
+            "chalise",
+            "canção",
+            "catuaba",
+            "ice",
+            "beats",
+            "syn",
+            "galiotto",
+            "dom bosco",
+            "cider"
+        ],
+        "🍟 MERCEARIA & DIVERSOS": [
+            "gelo",
+            "carvao",
+            "carvão",
+            "salgadinho",
+            "batata",
+            "amendoim",
+            "doritos",
+            "ruffles",
+            "cheetos",
+            "fandangos",
+            "chocolate",
+            "halls",
+            "trident",
+            "seda",
+            "cigarro",
+            "fumo",
+            "isqueiro",
+            "copo",
+            "baconzitos",
+            "cebolitos",
+            "torcida",
+            "kit kat"
+        ]
+    },
+    "site_url": "https://seu.ze.delivery/",
+    "fornecedores": {
+        "ACB": true,
+        "DISTRIB. DE BEBIDAS ACB LTDA": true,
+        "TAF": true,
+        "WIDAS": true,
+        "PEPSICO": true,
+        "DINHO": true,
+        "DQUECH": true,
+        "Dequech": true,
+        "TOZZO ALIMENTOS LTDA": true,
+        "TELE BIER EFAPI": true,
+        "Gelo Pop": true,
+        "Zé delivery": true,
+        "Sul do Oeste": true,
+        "CANDATTI BEBIDAS LTDA": true,
+        "Distribuidora Bertotti": true,
+        "2H DISTRIBUIDORA LTDA": true,
+        "Acb": true
+    },
+    "combos_estoque": {
+        "seu pedido com gelo na sacooler": [
+            {
+                "nome": "gelo 3.5kg",
+                "qtd": 0.5
+            },
+            {
+                "nome": "sacooler",
+                "qtd": 1
+            }
+        ],
+        "14 latas de skol 350ml + 1 sacooler com gelo": [
+            {
+                "nome": "skol 350ml",
+                "qtd": 14
+            },
+            {
+                "nome": "gelo 3.5kg",
+                "qtd": 0.5
+            },
+            {
+                "nome": "sacooler",
+                "qtd": 1
+            }
+        ],
+        "12 unidades de corona 350ml + sacooler": [
+            {
+                "nome": "Corona 350ml",
+                "qtd": 12.0
+            },
+            {
+                "nome": "MEIO GELO",
+                "qtd": 1.0
+            },
+            {
+                "nome": "SACOOLER",
+                "qtd": 1.0
+            },
+            {
+                "nome": "gelo 3.5kg",
+                "qtd": 0.5
+            }
+        ],
+        "8 unidades de corona extra 330ml + 1 sacooler": [
+            {
+                "nome": "Cerveja Corona Extra 330ml",
+                "qtd": 8.0
+            },
+            {
+                "nome": "MEIO GELO",
+                "qtd": 1.0
+            },
+            {
+                "nome": "SACOOLER",
+                "qtd": 1.0
+            },
+            {
+                "nome": "gelo 3.5kg",
+                "qtd": 0.5
+            }
+        ],
+        "8 unidades de corona cero 330ml + 1 sacooler": [
+            {
+                "nome": "Corona Cero Sunbrew 330ml",
+                "qtd": 8.0
+            },
+            {
+                "nome": "MEIO GELO",
+                "qtd": 1.0
+            },
+            {
+                "nome": "SACOOLER",
+                "qtd": 1.0
+            },
+            {
+                "nome": "gelo 3.5kg",
+                "qtd": 0.5
+            }
+        ]
+    }
+}

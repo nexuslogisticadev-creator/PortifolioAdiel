@@ -1,0 +1,2106 @@
+[
+    {
+        "nome": "12 Unidades De Corona 350Ml + Sacooler",
+        "estoque_fisico": 7367.0,
+        "preco_venda": 6.0,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Z\u00e9 delivery"
+    },
+    {
+        "nome": "14 Latas De Skol 350Ml + 1 Sacooler Com Gelo",
+        "estoque_fisico": 0,
+        "preco_venda": 3.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "51 Ice Balada 275Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 7.79,
+        "quantidade_minima": 3,
+        "categoria": "Ice",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "51 Ice Fruit Mix 275Ml",
+        "estoque_fisico": 65.0,
+        "preco_venda": 7.79,
+        "quantidade_minima": 3,
+        "categoria": "Ice",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "51 Ice Lim\u00e3o 275Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 7.79,
+        "quantidade_minima": 3,
+        "categoria": "Ice",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "51 Ice Maracuj\u00e1 275Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 7.79,
+        "quantidade_minima": 3,
+        "categoria": "Ice",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "8 Beats Green Mix 269Ml - Long Neck + 1 Sacooler",
+        "estoque_fisico": 0,
+        "preco_venda": 8.39,
+        "quantidade_minima": 3,
+        "categoria": "BEATS",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "8 Unidades De Corona Cero 330Ml + 1 Sacooler",
+        "estoque_fisico": 0,
+        "preco_venda": 72.31,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas Zero",
+        "fornecedor": "Z\u00e9 delivery"
+    },
+    {
+        "nome": "8 Unidades De Corona Extra 330Ml + 1 Sacooler",
+        "estoque_fisico": 0,
+        "preco_venda": 72.31,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "Z\u00e9 delivery"
+    },
+    {
+        "nome": "\u00c1gua Com G\u00e1s Fonte Da Ilha 500Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 1.49,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "\u00c1gua Sem G\u00e1s Fonte Da Ilha 500Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 1.29,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Amendoim Japon\u00eas Elma Chips 145G",
+        "estoque_fisico": 0,
+        "preco_venda": 12.59,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Antarctica Pilsen 300Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 2.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Antarctica Pilsen 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 57.6,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Antarctica Pilsen 600Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 7.09,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Antarctica Subzero 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Aperitivo Aperol 750Ml",
+        "estoque_fisico": 8.0,
+        "preco_venda": 86.29,
+        "quantidade_minima": 3,
+        "categoria": "Destilados",
+        "fornecedor": "DINHO"
+    },
+    {
+        "nome": "Aperitivo Bitter Campari Garrafa 998Ml",
+        "estoque_fisico": 8.0,
+        "preco_venda": 120.49,
+        "quantidade_minima": 3,
+        "categoria": "Destilados",
+        "fornecedor": "CANDATTI BEBIDAS LTDA"
+    },
+    {
+        "nome": "Baconzitos 86G",
+        "estoque_fisico": 5.0,
+        "preco_venda": 12.79,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Bala Halls Extra Forte 27G",
+        "estoque_fisico": 0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Bala Halls Menta 28G",
+        "estoque_fisico": 0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Bala Halls Morango 28G",
+        "estoque_fisico": 3.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Beats Gt 269Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.39,
+        "quantidade_minima": 3,
+        "categoria": "BEATS",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Beats Red Mix 269Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.39,
+        "quantidade_minima": 3,
+        "categoria": "BEATS",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Beats Senses 269Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.39,
+        "quantidade_minima": 3,
+        "categoria": "BEATS",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Beats Tropical 269Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 8.39,
+        "quantidade_minima": 3,
+        "categoria": "BEATS",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Bis Branco 100,8G",
+        "estoque_fisico": 0,
+        "preco_venda": 8.69,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Bis Xtra Ao Leite 45G",
+        "estoque_fisico": 0,
+        "preco_venda": 5.19,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Bis Xtra Oreo 45G",
+        "estoque_fisico": 3.0,
+        "preco_venda": 5.19,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Bohemia 350Ml",
+        "estoque_fisico": 27.0,
+        "preco_venda": 4.29,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Bombom Ouro Branco 20G",
+        "estoque_fisico": 0,
+        "preco_venda": 1.99,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Bombom Sonho De Valsa 20G",
+        "estoque_fisico": 0,
+        "preco_venda": 1.99,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma 300Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 2.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 66.42,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 4.99,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma 600Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 7.59,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma Duplo Malte 300Ml",
+        "estoque_fisico": 2.0,
+        "preco_venda": 3.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma Duplo Malte 350Ml",
+        "estoque_fisico": 21.0,
+        "preco_venda": 4.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma Zero 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.99,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas Zero",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brahma Zero 355Ml",
+        "estoque_fisico": 25.0,
+        "preco_venda": 4.99,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas Zero",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Brutal Fruit Spritzer 275Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 10.99,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Budweiser 300Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Budweiser 330Ml",
+        "estoque_fisico": 1790.0,
+        "preco_venda": 5.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Budweiser 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 4.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Budweiser 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Budweiser 600Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Budweiser Zero 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas Zero",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Budweiser Zero 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 4.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas Zero",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Cacha\u00e7a 51 965Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 15.29,
+        "quantidade_minima": 3,
+        "categoria": "Cacha\u00e7as",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Cacha\u00e7a Ypioca Ouro 965Ml",
+        "estoque_fisico": 5.0,
+        "preco_venda": 32.29,
+        "quantidade_minima": 3,
+        "categoria": "Cacha\u00e7as",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Carv\u00e3o 3Kg",
+        "estoque_fisico": 0,
+        "preco_venda": 27.79,
+        "quantidade_minima": 3,
+        "categoria": "Conveni\u00eancia",
+        "fornecedor": "Sul do Oeste"
+    },
+    {
+        "nome": "Cebolitos 91G",
+        "estoque_fisico": 0,
+        "preco_venda": 12.79,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Cerveja Corona Extra 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 7.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Cerveja Coronita 210Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Cheetos Lua Parmes\u00e3o 110G",
+        "estoque_fisico": 0,
+        "preco_venda": 15.89,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Cheetos Mix De Queijos 115G",
+        "estoque_fisico": 8.0,
+        "preco_venda": 15.89,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Cheetos Onda Requeij\u00e3o 105G",
+        "estoque_fisico": 0,
+        "preco_venda": 15.89,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Cheetos Onda Requeij\u00e3o 160G",
+        "estoque_fisico": 0,
+        "preco_venda": 20.09,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Chocolate Ao Leite Kit Kat 41,5G",
+        "estoque_fisico": 0,
+        "preco_venda": 5.49,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Bis Ao Leite 100,8G",
+        "estoque_fisico": 0,
+        "preco_venda": 8.69,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Bis Black Lacta 100G",
+        "estoque_fisico": 0,
+        "preco_venda": 8.69,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Bis Lacta Oreo 100G",
+        "estoque_fisico": 0,
+        "preco_venda": 8.69,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Branco Kit Kat 41,5G",
+        "estoque_fisico": 0.0,
+        "preco_venda": 5.49,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Lacta Amaro 40% Cacau 80G",
+        "estoque_fisico": 3.0,
+        "preco_venda": 10.99,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Lacta Ao Leite 80G",
+        "estoque_fisico": 0,
+        "preco_venda": 9.59,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Lacta Caixa De Variedades Favoritos 250G",
+        "estoque_fisico": 0,
+        "preco_venda": 22.69,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Lacta Oreo 90G",
+        "estoque_fisico": 0.0,
+        "preco_venda": 8.29,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Lacta Shot 80G",
+        "estoque_fisico": 0.0,
+        "preco_venda": 9.59,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Chocolate Snickers Original 45G",
+        "estoque_fisico": 11.0,
+        "preco_venda": 6.79,
+        "quantidade_minima": 3,
+        "categoria": "Chocolate",
+        "fornecedor": "-"
+    },
+    {
+        "nome": "Conhaque Dreher 900Ml",
+        "estoque_fisico": 13.0,
+        "preco_venda": 33.49,
+        "quantidade_minima": 3,
+        "categoria": "Conhaques",
+        "fornecedor": "CANDATTI BEBIDAS LTDA"
+    },
+    {
+        "nome": "Coquetel Alco\u00f3lico Mans\u00e3o Maromba Gin Melancia + Combo Pet 1L",
+        "estoque_fisico": 0.0,
+        "preco_venda": 19.89,
+        "quantidade_minima": 3,
+        "categoria": "Coquet\u00e9is",
+        "fornecedor": "Distribuidora Bertotti"
+    },
+    {
+        "nome": "Coquetel Alco\u00f3lico Mans\u00e3o Maromba Vodka + Cafe\u00edna Pet 1L",
+        "estoque_fisico": 6.0,
+        "preco_venda": 19.89,
+        "quantidade_minima": 3,
+        "categoria": "Coquet\u00e9is",
+        "fornecedor": "Distribuidora Bertotti"
+    },
+    {
+        "nome": "Coquetel Alco\u00f3lico Mans\u00e3o Maromba Whisky + Cafe\u00edna Pet 1L",
+        "estoque_fisico": 14.0,
+        "preco_venda": 19.89,
+        "quantidade_minima": 3,
+        "categoria": "Coquet\u00e9is",
+        "fornecedor": "Distribuidora Bertotti"
+    },
+    {
+        "nome": "Coquetel Alco\u00f3lico Mans\u00e3o Maromba Whisky + Combo Double Darkness 1L",
+        "estoque_fisico": 0.0,
+        "preco_venda": 19.89,
+        "quantidade_minima": 3,
+        "categoria": "Coquet\u00e9is",
+        "fornecedor": "Distribuidora Bertotti"
+    },
+    {
+        "nome": "Corona Cero Sunbrew 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 7.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas Zero",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Corona Cero Sunbrew 350Ml",
+        "estoque_fisico": 1.0,
+        "preco_venda": 5.99,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas Zero",
+        "fornecedor": "DISTRIB. DE BEBIDAS ACB LTDA"
+    },
+    {
+        "nome": "doritos queijo nacho 120g",
+        "estoque_fisico": 0,
+        "preco_venda": 14.59,
+        "quantidade_minima": 6,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Doritos Queijo Nacho 300G",
+        "estoque_fisico": 0.0,
+        "preco_venda": 32.89,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Energ\u00e9tico Abacaxi Com Hortel\u00e3 Baly 2L",
+        "estoque_fisico": 24.0,
+        "preco_venda": 14.89,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Abacaxi Com Hortel\u00e3 Baly 473Ml",
+        "estoque_fisico": 11.0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 14.89,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly 473Ml",
+        "estoque_fisico": 29.0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Coco E A\u00e7a\u00ed 473Ml",
+        "estoque_fisico": 22.0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Frutas Tropicais 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 14.89,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Frutas Tropicais 473Ml",
+        "estoque_fisico": 22.0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Ma\u00e7\u00e3 Verde 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 14.89,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Ma\u00e7\u00e3 Verde 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Melancia 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 14.89,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Melancia 473Ml",
+        "estoque_fisico": 13.0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Baly Tropical Sem A\u00e7\u00facar 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Coco E A\u00e7a\u00ed Baly 2L",
+        "estoque_fisico": 19.0,
+        "preco_venda": 14.89,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Morango E P\u00eassego Baly 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 14.89,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Energ\u00e9tico Morango E P\u00eassego Baly 473Ml",
+        "estoque_fisico": 10.0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "TOZZO ALIMENTOS LTDA"
+    },
+    {
+        "nome": "Espumante Brut Salton 750Ml",
+        "estoque_fisico": 22.0,
+        "preco_venda": 38.79,
+        "quantidade_minima": 3,
+        "categoria": "Espumante",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Espumante Moscatel Salton 750Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 38.79,
+        "quantidade_minima": 3,
+        "categoria": "Espumante",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Espumante Salton Brut Ros\u00e9 750Ml",
+        "estoque_fisico": 12.0,
+        "preco_venda": 38.79,
+        "quantidade_minima": 3,
+        "categoria": "Espumante",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Fandangos Presunto 105G",
+        "estoque_fisico": 0.0,
+        "preco_venda": 10.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Fandangos Presunto 160G",
+        "estoque_fisico": 0,
+        "preco_venda": 15.49,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Gatorade Berry Blue",
+        "estoque_fisico": 0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gatorade Frutas C\u00edtricas 500Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gatorade Laranja 500Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gatorade Lim\u00e3o 500Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gatorade Maracuj\u00e1 500Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gatorade Morango-Maracuj\u00e1 500Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gatorade Tangerina 500Ml",
+        "estoque_fisico": 6.0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gatorade Uva 500Ml",
+        "estoque_fisico": 8.0,
+        "preco_venda": 5.29,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Gelo Saborizado Coco Coco Leve 190G",
+        "estoque_fisico": 0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Gelo Saborizado Laranja Coco Leve 190G",
+        "estoque_fisico": 23.0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Gelo Saborizado Lim\u00e3o Coco Leve 190G",
+        "estoque_fisico": 0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "gelo saborizado ma\u00e7\u00e3 verde coco leve 190g",
+        "estoque_fisico": 0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Gelo Saborizado Maracuj\u00e1 Coco Leve 190G",
+        "estoque_fisico": 0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Gelo Saborizado Melancia Coco Leve 190G",
+        "estoque_fisico": 4.0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Gelo Saborizado Morango Coco Leve 190G",
+        "estoque_fisico": 0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Gelo Saborizado Sal E Lim\u00e3o Coco Leve 190G",
+        "estoque_fisico": 0,
+        "preco_venda": 4.69,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Gin Beefeater London Dry 750Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 0.0,
+        "quantidade_minima": 3,
+        "categoria": "Destilados",
+        "fornecedor": "-"
+    },
+    {
+        "nome": "Gin Intencion London Dry 900Ml",
+        "estoque_fisico": 13.0,
+        "preco_venda": 31.29,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Gin Intencion Strawberry 900Ml",
+        "estoque_fisico": 22.0,
+        "preco_venda": 31.29,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Gin Rocks 995Ml",
+        "estoque_fisico": 10.0,
+        "preco_venda": 47.89,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Gin Rocks Strawberry 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 32.99,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Gin Sunset Rocks Garrafa Vidro 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 32.99,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Gin Tanqueray London Dry 750Ml",
+        "estoque_fisico": 2.0,
+        "preco_venda": 133.29,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Gin Tanqueray Rangpur 700Ml",
+        "estoque_fisico": 1.0,
+        "preco_venda": 178.99,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Gin Tanqueray Sevilla 700Ml",
+        "estoque_fisico": 1.0,
+        "preco_venda": 177.39,
+        "quantidade_minima": 3,
+        "categoria": "Gin",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Guaran\u00e1 Antarctica 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 9.59,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Guaran\u00e1 Antarctica 350Ml",
+        "estoque_fisico": 13.0,
+        "preco_venda": 3.29,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Guaran\u00e1 Antarctica 600Ml",
+        "estoque_fisico": 14.0,
+        "preco_venda": 4.29,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Guaran\u00e1 Antarctica Zero 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 9.59,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Guaran\u00e1 Antarctica Zero 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.29,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Guaran\u00e1 Antarctica Zero 600Ml",
+        "estoque_fisico": 3.0,
+        "preco_venda": 4.29,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "H2Oh Lim\u00e3o 500Ml",
+        "estoque_fisico": 10.0,
+        "preco_venda": 4.79,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Halls Cereja 28G",
+        "estoque_fisico": 6.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Halls Melancia 28G",
+        "estoque_fisico": 25.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Halls Mentol 28G",
+        "estoque_fisico": 28.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Isqueiro Bic Grande - Unidade",
+        "estoque_fisico": 0,
+        "preco_venda": 8.59,
+        "quantidade_minima": 3,
+        "categoria": "Conveni\u00eancia",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Lays Cl\u00e1ssica 70G",
+        "estoque_fisico": 0,
+        "preco_venda": 10.99,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Licor 43 700Ml",
+        "estoque_fisico": 2.0,
+        "preco_venda": 209.49,
+        "quantidade_minima": 3,
+        "categoria": "Licores",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Licor Amarula 750Ml",
+        "estoque_fisico": 5.0,
+        "preco_venda": 152.99,
+        "quantidade_minima": 3,
+        "categoria": "Licores",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Licor Stock Cassis 720Ml",
+        "estoque_fisico": 6.0,
+        "preco_venda": 73.19,
+        "quantidade_minima": 3,
+        "categoria": "Licores",
+        "fornecedor": "DINHO"
+    },
+    {
+        "nome": "Licor Stock Chocolate 720Ml",
+        "estoque_fisico": 6.0,
+        "preco_venda": 73.19,
+        "quantidade_minima": 3,
+        "categoria": "Licores",
+        "fornecedor": "DINHO"
+    },
+    {
+        "nome": "Licor Stock Cura\u00e7au Blue 720Ml",
+        "estoque_fisico": 5.0,
+        "preco_venda": 73.19,
+        "quantidade_minima": 3,
+        "categoria": "Licores",
+        "fornecedor": "DINHO"
+    },
+    {
+        "nome": "Martini Extra Dry 750Ml",
+        "estoque_fisico": 5.0,
+        "preco_venda": 94.09,
+        "quantidade_minima": 3,
+        "categoria": "Destilados",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Martini Rosato 750Ml",
+        "estoque_fisico": 6.0,
+        "preco_venda": 89.49,
+        "quantidade_minima": 3,
+        "categoria": "Destilados",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Meio Gelo",
+        "estoque_fisico": 0.0,
+        "preco_venda": 6.39,
+        "quantidade_minima": 3,
+        "categoria": "-",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Mentos Fruit 37,5G",
+        "estoque_fisico": 0.0,
+        "preco_venda": 3.29,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Mentos Frutas Vermelhas 37,5G",
+        "estoque_fisico": 10.0,
+        "preco_venda": 3.29,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Mentos Mint 37,5G",
+        "estoque_fisico": 7.0,
+        "preco_venda": 3.29,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Michelob Ultra Light Lager 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 6.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Original 300Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.39,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Original 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 57.48,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Original 600Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.59,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Papel Seda Smoking Deluxe",
+        "estoque_fisico": 0,
+        "preco_venda": 10.79,
+        "quantidade_minima": 3,
+        "categoria": "Conveni\u00eancia",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Patagonia Amber Lager 355Ml",
+        "estoque_fisico": 24.0,
+        "preco_venda": 8.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Patagonia Amber Lager 473Ml",
+        "estoque_fisico": 79.0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Patagonia Bohemian Pilsener 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Patagonia Ipa 355Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Patagonia Weisse 355Ml",
+        "estoque_fisico": 26.0,
+        "preco_venda": 8.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Patagonia Weisse 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Pepsi 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 8.99,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Pepsi 350Ml",
+        "estoque_fisico": 79.0,
+        "preco_venda": 3.39,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Pepsi 600Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 4.39,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Pepsi Black 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 8.99,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Pepsi Black 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.39,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Pingo D'Ouro Bacon 160G",
+        "estoque_fisico": 0,
+        "preco_venda": 12.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Pingo D'Ouro Picanha 120G",
+        "estoque_fisico": 4.0,
+        "preco_venda": 12.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Pringles Original 114G",
+        "estoque_fisico": 0,
+        "preco_venda": 14.19,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Pringles Queijo 109G",
+        "estoque_fisico": 0,
+        "preco_venda": 14.19,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Pringles Sour Cream & Onion 109G",
+        "estoque_fisico": 0,
+        "preco_venda": 14.19,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "Red Bull Energy Drink 250Ml",
+        "estoque_fisico": 11.0,
+        "preco_venda": 10.99,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Red Bull Energy Drink 355Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 15.49,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Red Bull Energy Drink 473Ml",
+        "estoque_fisico": 44.0,
+        "preco_venda": 19.49,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Red Bull Melancia 250Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 10.99,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Red Bull Sugarfree 250Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 10.99,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Red Bull Tropical Edition 250Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 10.99,
+        "quantidade_minima": 3,
+        "categoria": "Energetico",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Ruffles Original 115G",
+        "estoque_fisico": 10.0,
+        "preco_venda": 13.99,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Rum Bacardi Carta Blanca 980Ml",
+        "estoque_fisico": 5.0,
+        "preco_venda": 71.09,
+        "quantidade_minima": 3,
+        "categoria": "Rum",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Saco De Gelo Em Cubos - 3Kg",
+        "estoque_fisico": 0,
+        "preco_venda": 12.79,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "Gelo Pop"
+    },
+    {
+        "nome": "Salgadinho Cheetos Crunchy Super Cheddar 78G",
+        "estoque_fisico": 3.0,
+        "preco_venda": 9.79,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Serramalte 600Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 8.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Skol 300Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 2.69,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Skol 350Ml - Pack Econ\u00f4mico (12 Unidades)",
+        "estoque_fisico": 0.0,
+        "preco_venda": 41.88,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Skol 350Ml - Pack Econ\u00f4mico (18 Unidades)",
+        "estoque_fisico": 1.0,
+        "preco_venda": 57.49,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Skol 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 4.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Skol 600Ml",
+        "estoque_fisico": 192.0,
+        "preco_venda": 7.39,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Smirnoff Ice 275Ml - Long Neck",
+        "estoque_fisico": 0,
+        "preco_venda": 9.19,
+        "quantidade_minima": 3,
+        "categoria": "Ice",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Soda Antarctica 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 7.69,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Soda Antarctica 350Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 3.39,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Spaten 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.99,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Spaten 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 4.89,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Spaten 473Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Spaten 600Ml",
+        "estoque_fisico": 13.0,
+        "preco_venda": 8.59,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Stella Artois 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 6.69,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Stella Artois 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Stella Pure Gold 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 7.09,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Stella Pure Gold 350Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 6.09,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Suco De Laranja Prats 300Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 11.49,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "WIDAS"
+    },
+    {
+        "nome": "Suco De Laranja Prats 900Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 18.89,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "WIDAS"
+    },
+    {
+        "nome": "Suco De Uva Prats 300Ml",
+        "estoque_fisico": 10.0,
+        "preco_venda": 11.49,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "WIDAS"
+    },
+    {
+        "nome": "Suco De Uva Prats 900Ml",
+        "estoque_fisico": 7.0,
+        "preco_venda": 23.09,
+        "quantidade_minima": 3,
+        "categoria": "Sucos",
+        "fornecedor": "WIDAS"
+    },
+    {
+        "nome": "Sukita 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Sukita 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.39,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Sukita Uva 2L",
+        "estoque_fisico": 0,
+        "preco_venda": 8.19,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Sukita Uva 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.39,
+        "quantidade_minima": 3,
+        "categoria": "Refrigerante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Tequila Jos\u00e9 Cuervo Especial Prata 750Ml",
+        "estoque_fisico": 1.0,
+        "preco_venda": 168.39,
+        "quantidade_minima": 3,
+        "categoria": "Destilados",
+        "fornecedor": "TELE BIER EFAPI"
+    },
+    {
+        "nome": "T\u00f4nica Antarctica 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.59,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "T\u00f4nica Antarctica Zero 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 3.59,
+        "quantidade_minima": 3,
+        "categoria": "\u00c1guas e Gelo",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Torcida Cebola 100G",
+        "estoque_fisico": 0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Torcida Churrasco 100G",
+        "estoque_fisico": 10.0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Torcida P\u00e3o De Alho 100G",
+        "estoque_fisico": 15.0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Torcida Pimenta Mexicana 100G",
+        "estoque_fisico": 8.0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Torcida Queijo 100G",
+        "estoque_fisico": 23.0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Torcida Vinagrete 100G",
+        "estoque_fisico": 33.0,
+        "preco_venda": 5.69,
+        "quantidade_minima": 3,
+        "categoria": "Salgadinhos",
+        "fornecedor": "PEPSICO"
+    },
+    {
+        "nome": "Trident Canela 8G",
+        "estoque_fisico": 19.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Trident Hortel\u00e3 8G",
+        "estoque_fisico": 2.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Trident Melancia 8G",
+        "estoque_fisico": 0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Trident Menta 8G",
+        "estoque_fisico": 0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Trident Morango 8G",
+        "estoque_fisico": 1.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Trident Tutti Frutti 8G",
+        "estoque_fisico": 3.0,
+        "preco_venda": 2.49,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Vinho Branco Chardonnay Pedro Jimenez Reservado Concha Y Toro 750Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 43.59,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Branco Jurupinga Dinalle 975Ml",
+        "estoque_fisico": 11.0,
+        "preco_venda": 46.49,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Branco Sauvignon Blanc Pedro Jimenez Reservado Concha Y Toro 750Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 38.19,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Branco Seco Campo Largo 750Ml",
+        "estoque_fisico": 12.0,
+        "preco_venda": 26.69,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Branco Suave Campo Largo 750Ml",
+        "estoque_fisico": 11.0,
+        "preco_venda": 26.69,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Branco Sweet Casal Garcia 750Ml",
+        "estoque_fisico": 8.0,
+        "preco_venda": 75.19,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Branco Verde Casal Garcia 750Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 75.19,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Espumante Branco Brut Novecento 750Ml",
+        "estoque_fisico": 6.0,
+        "preco_venda": 40.89,
+        "quantidade_minima": 3,
+        "categoria": "Espumante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Vinho Espumante Branco Doce Novecento 750Ml",
+        "estoque_fisico": 6.0,
+        "preco_venda": 40.89,
+        "quantidade_minima": 3,
+        "categoria": "Espumante",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Vinho Ros\u00e9 Suave Campo Largo 750Ml",
+        "estoque_fisico": 2.0,
+        "preco_venda": 26.69,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Rose Suave Reservado Sweet Concha Y Toro 750Ml",
+        "estoque_fisico": 17.0,
+        "preco_venda": 43.59,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Tinto Cabernet Sauvignon Reservado Concha Y Toro 750Ml",
+        "estoque_fisico": 16.0,
+        "preco_venda": 38.19,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Tinto Carm\u00e9n\u00e8re Reservado Concha Y Toro 750Ml",
+        "estoque_fisico": 21.0,
+        "preco_venda": 38.19,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Tinto Seco Cabernet Sauvignon Casillero Del Diablo 750Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 53.29,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Tinto Seco Campo Largo 750Ml",
+        "estoque_fisico": 7.0,
+        "preco_venda": 26.69,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Tinto Suave Campo Largo 750Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 26.69,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vinho Tinto Sweet Red Reservado Concha Y Toro 750Ml",
+        "estoque_fisico": 19.0,
+        "preco_venda": 43.59,
+        "quantidade_minima": 3,
+        "categoria": "Vinhos",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Vodka Absolut Original 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 111.89,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Vodka Ciroc 750Ml",
+        "estoque_fisico": 2.0,
+        "preco_venda": 250.79,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Vodka Ciroc Red Berry 750Ml",
+        "estoque_fisico": 1.0,
+        "preco_venda": 223.59,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Vodka Grey Goose 750Ml",
+        "estoque_fisico": 1.0,
+        "preco_venda": 232.89,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Vodka Intencion 900Ml",
+        "estoque_fisico": 9.0,
+        "preco_venda": 25.09,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Vodka Orloff 1L",
+        "estoque_fisico": 7.0,
+        "preco_venda": 36.49,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "2H DISTRIBUIDORA LTDA"
+    },
+    {
+        "nome": "Vodka Raiska 1L",
+        "estoque_fisico": 5.0,
+        "preco_venda": 28.69,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Vodka Smirnoff 998Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 41.89,
+        "quantidade_minima": 3,
+        "categoria": "Vodkas",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Vodka Smirnoff Ice 269Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 6.59,
+        "quantidade_minima": 3,
+        "categoria": "Ice",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Whisky Ballantine'S Finest Blended Escoc\u00eas 1L",
+        "estoque_fisico": 5.0,
+        "preco_venda": 92.89,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "2H DISTRIBUIDORA LTDA"
+    },
+    {
+        "nome": "Whisky Chivas Regal 12 Anos 750Ml",
+        "estoque_fisico": 0.0,
+        "preco_venda": 127.89,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jack Daniel'S Fire 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 191.49,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jack Daniels 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 188.79,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jack Daniels 375Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 82.69,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jack Daniels Honey 1L",
+        "estoque_fisico": 14.0,
+        "preco_venda": 206.79,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jack Daniels Ma\u00e7\u00e3 Verde 1L",
+        "estoque_fisico": 9.0,
+        "preco_venda": 206.79,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jim Beam Apple 1L",
+        "estoque_fisico": 0.0,
+        "preco_venda": 149.39,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jim Beam Honey 1L",
+        "estoque_fisico": 14.0,
+        "preco_venda": 124.89,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Jim Beam White 1L",
+        "estoque_fisico": 3.0,
+        "preco_venda": 124.89,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Johnnie Walker Black Label 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 209.09,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Johnnie Walker Red Label 1L",
+        "estoque_fisico": 12.0,
+        "preco_venda": 113.09,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "Whisky Natu Nobilis 1L",
+        "estoque_fisico": 13.0,
+        "preco_venda": 53.49,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "TAF"
+    },
+    {
+        "nome": "Whisky Old Parr Grand 12 Anos 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 199.59,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "Dequech"
+    },
+    {
+        "nome": "Whisky Passport Scotch 1L",
+        "estoque_fisico": 8.0,
+        "preco_venda": 57.69,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "2H DISTRIBUIDORA LTDA"
+    },
+    {
+        "nome": "Whisky White Horse 1L",
+        "estoque_fisico": 0,
+        "preco_venda": 80.59,
+        "quantidade_minima": 3,
+        "categoria": "Whisky",
+        "fornecedor": "DQUECH"
+    },
+    {
+        "nome": "patagonia ipa 473ml",
+        "estoque_fisico": 0,
+        "categoria": "Cervejas",
+        "preco_venda": 8.19,
+        "fornecedor": "Manual",
+        "quantidade_minima": 6
+    },
+    {
+        "nome": "Chiclete Trident Tutti-Frutti Embalagem Econ\u00f4mica 25G",
+        "estoque_fisico": 0.0,
+        "preco_venda": 6.99,
+        "quantidade_minima": 3,
+        "categoria": "Balas e Chicletes",
+        "fornecedor": "ACB"
+    },
+    {
+        "nome": "Flying Fish 330Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "-"
+    },
+    {
+        "nome": "Flying Fish 350Ml",
+        "estoque_fisico": 0,
+        "preco_venda": 5.79,
+        "quantidade_minima": 3,
+        "categoria": "Cervejas",
+        "fornecedor": "-"
+    }
+]
