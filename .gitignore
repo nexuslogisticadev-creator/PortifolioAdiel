@@ -2,6 +2,10 @@
 __pycache__/
 *.pyc
 *.pyo
+*.txt
+*.spec
+*.lnk
+*.pdf
 *.pyd
 
 # Virtual environments
