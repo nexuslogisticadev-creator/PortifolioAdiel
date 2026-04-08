@@ -7,7 +7,7 @@ __pycache__/
 *.lnk
 *.pdf
 *.pyd
-
+teste_novo/
 # Virtual environments
 .venv/
 venv/
@@ -33,4 +33,6 @@ dist/
 dist/
 *.exe
 node_modules
+monitor-pedidos/teste_novo
+monitor-pedidos/teste_novo
 monitor-pedidos/teste_novo
