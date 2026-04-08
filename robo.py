@@ -3388,27 +3388,36 @@ def imprimir_extrato_por_nome(nome_alvo, data_str, hora_ini=None, hora_fim=None,
             h = ped.get('hora')
             t_ped = parse_hora(h)
             val = float(ped.get('valor', 0.0) or 0.0)
-            if t_ped and t_in <= t_ped <= t_out:
-                # Entrega dentro do período garantido
-                prod_dentro += val
-                if abs(val - 8.0) < 0.1:
-                    qtd8_dentro += 1
-                elif abs(val - 11.0) < 0.1:
-                    qtd11_dentro += 1
-                print(f"   ✅ DENTRO: Ped {ped.get('numero')} hora={h} parsed={t_ped.strftime('%H:%M')} val={val}")
-            elif t_ped and t_ped > t_out:
-                # Entrega APÓS o horário garantido = extra
-                prod_fora += val
-                if abs(val - 8.0) < 0.1:
-                    qtd8_fora += 1
-                elif abs(val - 11.0) < 0.1:
-                    qtd11_fora += 1
-                print(f"   ➕ EXTRA: Ped {ped.get('numero')} hora={h} parsed={t_ped.strftime('%H:%M')} val={val}")
-            elif t_ped and t_ped < t_in:
-                print(f"   ⏭️ ANTES: Ped {ped.get('numero')} hora={h} parsed={t_ped.strftime('%H:%M')} val={val} (ignorada)")
+            
+            if t_ped is not None:
+                # SEGREDO PARA A MADRUGADA: Se a entrega for antes das 10h da manhã,
+                # o sistema entende que é madrugada e soma 1 dia (24h) na matemática
+                if t_ped.hour < 10:
+                    t_ped += timedelta(days=1)
+                
+                # Fazemos o mesmo para o horário de saída (caso o turno acabe de madrugada)
+                t_out_calc = t_out
+                if t_out_calc.hour < 10:
+                    t_out_calc += timedelta(days=1)
+
+                if t_ped <= t_out_calc:
+                    # Entrega ANTES ou DURANTE o período garantido
+                    prod_dentro += val
+                    if abs(val - 8.0) < 0.1:
+                        qtd8_dentro += 1
+                    elif abs(val - 11.0) < 0.1:
+                        qtd11_dentro += 1
+                    print(f"   ✅ DENTRO: Ped {ped.get('numero')} hora={h} val={val}")
+                elif t_ped > t_out_calc:
+                    # Entrega APÓS o horário garantido (Madrugada vira extra)
+                    prod_fora += val
+                    if abs(val - 8.0) < 0.1:
+                        qtd8_fora += 1
+                    elif abs(val - 11.0) < 0.1:
+                        qtd11_fora += 1
+                    print(f"   ➕ EXTRA: Ped {ped.get('numero')} hora={h} val={val}")
             else:
                 print(f"   ❓ SEM HORA: Ped {ped.get('numero')} hora={h} parsed=None val={val} (ignorada)")
-            # Entregas ANTES do horário inicial são ignoradas no cálculo
 
         # Calcula garantia (manual ou automático)
         if valor_garantido is not None:

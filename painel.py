@@ -1329,20 +1329,31 @@ class PainelUltra(ctk.CTk):
             t_ped = self._parse_hora(str(entrega.get("hora", "")))
             val = float(entrega.get("valor", 0.0) or 0.0)
 
-            if t_ped is not None and t_ped <= t_out:
-                # Entrega ANTES ou DURANTE o período garantido
-                prod_dentro += val
-                if abs(val - 8.0) < 0.1:
-                    qtd8_dentro += 1
-                elif abs(val - 11.0) < 0.1:
-                    qtd11_dentro += 1
-            elif t_ped is not None and t_ped > t_out:
-                # Entrega APÓS o horário garantido = extra
-                prod_fora += val
-                if abs(val - 8.0) < 0.1:
-                    qtd8_fora += 1
-                elif abs(val - 11.0) < 0.1:
-                    qtd11_fora += 1
+            if t_ped is not None:
+                # SEGREDO PARA A MADRUGADA: Se a entrega for antes das 10h da manhã,
+                # o sistema entende que é madrugada e soma 1 dia (24h) na matemática
+                if t_ped.hour < 10:
+                    t_ped += timedelta(days=1)
+                
+                # Fazemos o mesmo para o horário de saída (caso o turno acabe de madrugada)
+                t_out_calc = t_out
+                if t_out_calc.hour < 10:
+                    t_out_calc += timedelta(days=1)
+
+                if t_ped <= t_out_calc:
+                    # Entrega ANTES ou DURANTE o período garantido
+                    prod_dentro += val
+                    if abs(val - 8.0) < 0.1:
+                        qtd8_dentro += 1
+                    elif abs(val - 11.0) < 0.1:
+                        qtd11_dentro += 1
+                elif t_ped > t_out_calc:
+                    # Entrega APÓS o horário garantido (Madrugada vira extra)
+                    prod_fora += val
+                    if abs(val - 8.0) < 0.1:
+                        qtd8_fora += 1
+                    elif abs(val - 11.0) < 0.1:
+                        qtd11_fora += 1
 
         gar_valor = self._parse_float(gar_txt)
         if gar_valor is None:
@@ -2751,7 +2762,7 @@ class PainelUltra(ctk.CTk):
         logger.info(f"Carregando config de: {ARQUIVO_CONFIG}")
         if not os.path.exists(ARQUIVO_CONFIG):
             logger.warning(f"Arquivo {ARQUIVO_CONFIG} não encontrado, usando config padrão vazia")
-            return {"email": "", "senha": "", "motoboys": {}, "bairros": {}, "respostas_bot": {}, "fornecedores": {}}
+            return {"email": "", "senha": "", "motoboys": {}, "bairros": {}, "respostas_bot": {},}
         try:
             with open(ARQUIVO_CONFIG, 'r', encoding='utf-8') as f:
                 config = json.load(f)
@@ -3361,35 +3372,10 @@ class PainelUltra(ctk.CTk):
         self.salvar_config()
         self.mostrar_toast("Zonas Salvas!", "success")
 
-    def _atualizar_combo_fornecedores(self, _=None):
-        fornecedores = sorted(list(self.config_data.get("fornecedores", {}).keys()))
-        if fornecedores:
-            self.combo_fornecedor.configure(values=["-"] + fornecedores)
-        else:
-            self.combo_fornecedor.configure(values=["-"])
-        if self.combo_fornecedor.get() == "Selecione o Fornecedor":
-            self.combo_fornecedor.set("-")
-
-    def add_fornecedor_dialog(self):
-        novo_fornecedor = simpledialog.askstring("Novo Fornecedor", "Digite o nome do novo fornecedor:")
-        if novo_fornecedor:
-            novo_fornecedor = novo_fornecedor.strip().title()
-            if novo_fornecedor:
-                self.config_data.setdefault("fornecedores", {})[novo_fornecedor] = True # Salva com um valor booleano simples
-                self.salvar_config()
-                self._atualizar_combo_fornecedores()
-                self.combo_fornecedor.set(novo_fornecedor)
-                self.mostrar_toast(f"Fornecedor '{novo_fornecedor}' adicionado!", "success")
-
-
-    def filtrar_tabela_busca(self, _):
-        termo = self.ent_busca.get().lower()
+    def filtrar_tabela_busca(self, _=None):
+        termo = self.ent_busca.get().strip().lower()
         if self.search_after_id:
-            try:
-                self.after_cancel(self.search_after_id)
-            except Exception:
-                pass
-
+            self.after_cancel(self.search_after_id)
         if not termo:
             self.search_after_id = self.after(150, lambda: self.carregar_tabela())
             return
